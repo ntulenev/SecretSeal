@@ -12,6 +12,22 @@ Unlike public services, SecretSeal runs on **your own hosting**, so you always k
 - 🚫 No ads, no tracking, no analytics
 - 🤝 Perfect for personal use and sharing secrets with friends
 
+### 🔐 Encryption
+
+Notes are stored **encrypted** using **AES-256**.
+
+- Encryption key is provided via `appsettings.json`
+- Plaintext data is never stored
+- Protects against accidental disclosure (logs, memory dumps, debugging, crashes)
+
+```json
+{
+  "Crypto": {
+    "Key": "32-byte-secret-key"
+  }
+}
+```
+
 ### ⚠️ Early MVP Notice
 
 The current implementation is an early MVP.
