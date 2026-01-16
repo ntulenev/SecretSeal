@@ -12,3 +12,10 @@ Unlike public services, SecretSeal runs on **your own hosting**, so you always k
 - 🚫 No ads, no tracking, no analytics
 - 🤝 Perfect for personal use and sharing secrets with friends
 
+### ⚠️ Early MVP Notice
+
+The current implementation is an early MVP.
+
+All data is stored **in memory** and therefore **does not survive application restarts**.
+
+This version is intended for **immediate secret sharing**, not for storing links to be accessed later.
