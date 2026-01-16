@@ -4,6 +4,8 @@
 
 It allows you to create **one-time readable messages** that are **automatically destroyed after being opened**.
 
+![Screenshot](Screenshot.png)
+
 Unlike public services, SecretSeal runs on **your own hosting**, so you always know **who has access to your data and where it lives**.
 
 ### ✨ Features
