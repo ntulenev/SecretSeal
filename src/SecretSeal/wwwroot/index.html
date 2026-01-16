@@ -1,0 +1,356 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>🦭 SecretSeal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0 0 24px;
+            font-size: 40px;
+            letter-spacing: 0.5px;
+        }
+
+        section {
+            background: #020617;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        h2 {
+            margin: 0 0 14px;
+            font-size: 28px;
+        }
+
+        textarea, input {
+            width: 100%;
+            background: #020617;
+            color: #e5e7eb;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 12px 12px;
+            margin-top: 8px;
+            outline: none;
+        }
+
+            textarea:focus, input:focus {
+                border-color: #38bdf8;
+                box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+            }
+
+        textarea {
+            resize: vertical;
+            min-height: 130px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 16px;
+            background: #38bdf8;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            color: #001018;
+        }
+
+            button:hover {
+                background: #0ea5e9;
+            }
+
+            button:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            line-height: 1.35;
+        }
+
+        .success {
+            background: #022c22;
+            border: 1px solid #064e3b;
+            color: #bbf7d0;
+        }
+
+        .error {
+            background: #3f1d1d;
+            border: 1px solid #7f1d1d;
+            color: #fecaca;
+        }
+
+        .hint {
+            opacity: 0.7;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        footer {
+            text-align: center;
+            opacity: 0.65;
+            margin-top: 34px;
+            padding-bottom: 10px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            flex: 1 1 420px;
+            min-width: 260px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #020617;
+            color: #e5e7eb;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            background: #1f2937;
+            color: #e5e7eb;
+            border: 1px solid #334155;
+        }
+
+            .copy-btn:hover {
+                background: #111827;
+            }
+
+        .mini {
+            opacity: 0.8;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🦭 SecretSeal</h1>
+
+    <section>
+        <h2>🔐 Create a secret</h2>
+
+        <textarea id="createNote" rows="5" placeholder="Enter your secret..."></textarea>
+
+        <div class="actions">
+            <button id="createBtn" type="button" onclick="createNote()">Create</button>
+        </div>
+
+        <div id="createResult" class="result"></div>
+
+        <div id="createShare" style="display:none;">
+            <div class="row">
+                <div class="pill" id="guidBox"></div>
+                <button class="copy-btn" type="button" onclick="copyFrom('guidBox')">Copy GUID</button>
+            </div>
+
+            <div class="row">
+                <div class="pill" id="linkBox"></div>
+                <button class="copy-btn" type="button" onclick="copyFrom('linkBox')">Copy link</button>
+            </div>
+
+            <div class="mini">Share the link with a friend. It will ask for confirmation, then read & destroy the secret.</div>
+        </div>
+
+        <div class="hint">Creates a one-time note and returns a GUID you can share.</div>
+    </section>
+
+    <section>
+        <h2>🔥 Read & destroy a secret</h2>
+
+        <input id="readId" placeholder="Enter secret GUID" />
+        <div class="actions">
+            <button id="readBtn" type="button" onclick="readNote()">Read & Destroy</button>
+        </div>
+
+        <div id="readResult" class="result"></div>
+        <div class="hint">This will delete the note immediately after reading (DELETE).</div>
+    </section>
+
+    <footer>
+        SecretSeal 🦭 — read once, vanish forever
+    </footer>
+
+    <script>
+        function setResult(el, kind, text) {
+            el.textContent = text || "";
+            el.className = "result";
+            if (kind) el.classList.add(kind);
+        }
+
+        async function readJsonSafe(response) {
+            const text = await response.text();
+            if (!text) return null;
+            try { return JSON.parse(text); }
+            catch { return { error: text }; }
+        }
+
+        async function copyText(text) {
+            // Prefer Clipboard API, fallback to execCommand
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+            } catch { /* ignore */ }
+
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.left = "-10000px";
+            ta.style.top = "-10000px";
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                const ok = document.execCommand("copy");
+                document.body.removeChild(ta);
+                return ok;
+            } catch {
+                document.body.removeChild(ta);
+                return false;
+            }
+        }
+
+        async function copyFrom(elementId) {
+            const el = document.getElementById(elementId);
+            const text = (el?.textContent || "").trim();
+            if (!text) return;
+
+            const ok = await copyText(text);
+            // tiny UX feedback
+            const old = el.textContent;
+            el.textContent = ok ? (old + "  ✅ Copied") : (old + "  ❌ Copy failed");
+            setTimeout(() => { el.textContent = old; }, 900);
+        }
+
+        async function createNote() {
+            const noteInput = document.getElementById("createNote");
+            const btn = document.getElementById("createBtn");
+            const result = document.getElementById("createResult");
+
+            const share = document.getElementById("createShare");
+            const guidBox = document.getElementById("guidBox");
+            const linkBox = document.getElementById("linkBox");
+
+            setResult(result, null, "");
+            share.style.display = "none";
+            guidBox.textContent = "";
+            linkBox.textContent = "";
+
+            btn.disabled = true;
+
+            try {
+                const note = (noteInput.value || "").trim();
+
+                const response = await fetch("/notes", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ note })
+                });
+
+                const data = await readJsonSafe(response);
+
+                if (!response.ok) {
+                    throw new Error((data && data.error) || "Failed to create note");
+                }
+
+                // Clear input on success
+                noteInput.value = "";
+                noteInput.focus();
+
+                const id = data.id;
+                const link = `${window.location.origin}/read.html?id=${encodeURIComponent(id)}`;
+
+                setResult(result, "success", "Secret created! Share it using GUID or link below:");
+
+                guidBox.textContent = id;
+                linkBox.textContent = link;
+                share.style.display = "block";
+
+                // Optional: auto-copy link (comment out if you don't want it)
+                // await copyText(link);
+
+            } catch (err) {
+                setResult(result, "error", err?.message || String(err));
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function readNote() {
+            const idInput = document.getElementById("readId");
+            const btn = document.getElementById("readBtn");
+            const result = document.getElementById("readResult");
+
+            setResult(result, null, "");
+            const id = (idInput.value || "").trim();
+
+            if (!id) {
+                setResult(result, "error", "GUID is required");
+                return;
+            }
+
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/notes/${encodeURIComponent(id)}`, {
+                    method: "DELETE"
+                });
+
+                const data = await readJsonSafe(response);
+
+                if (!response.ok) {
+                    throw new Error((data && data.error) || "Note not found");
+                }
+
+                setResult(result, "success", `Secret:\n\n${data.note}`);
+
+            } catch (err) {
+                setResult(result, "error", err?.message || String(err));
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+</html>
