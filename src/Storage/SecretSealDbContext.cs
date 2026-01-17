@@ -27,7 +27,7 @@ public sealed class SecretSealDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
-        _ = modelBuilder.Entity<DeletedNoteRow>().HasNoKey();
+        _ = modelBuilder.Entity<DeletedNoteRow>().HasNoKey().ToView(null);
         _ = modelBuilder.Entity<NoteEntity>(entity =>
         {
             _ = entity.ToTable("Notes");
