@@ -1,7 +1,8 @@
-﻿using Abstractions;
+using Abstractions;
+
 using Models;
+
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Logic;
 
@@ -39,11 +40,10 @@ public class InMemoryNotesHandler : INotesHandler
     {
         ArgumentNullException.ThrowIfNull(noteId);
 
-        if (!_notes.TryRemove(noteId, out var note))
-        {
-            return Task.FromResult<Note?>(null!);
-        }
-        return Task.FromResult<Note?>(note);
+        return !_notes.TryRemove(noteId, out var note) ?
+            Task.FromResult<Note?>(null!)
+            :
+            Task.FromResult<Note?>(note);
     }
 
     /// <summary>
@@ -51,10 +51,7 @@ public class InMemoryNotesHandler : INotesHandler
     /// </summary>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the total number of notes.</returns>
-    public Task<long> GetNotesCountAsync(CancellationToken cancellationToken)
-    {
-        return Task.FromResult((long)_notes.Count);
-    }
+    public Task<long> GetNotesCountAsync(CancellationToken cancellationToken) => Task.FromResult((long)_notes.Count);
 
     private readonly ConcurrentDictionary<NoteId, Note> _notes = new();
 }
