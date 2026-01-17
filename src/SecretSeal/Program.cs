@@ -32,7 +32,7 @@ app.MapPost("/notes",
             return Results.BadRequest(new { error = "Note must not be empty." });
         }
         var internalNote = Note.Create(note);
-        await handler.AddNoteAsync(Note.Create(note), token).ConfigureAwait(false);
+        await handler.AddNoteAsync(internalNote, token).ConfigureAwait(false);
         return Results.Ok(new CreateNoteResponse(internalNote.Id.Value));
     });
 app.MapDelete("/notes/{id:guid}", async (Guid id, INotesHandler handler, CancellationToken token) =>
