@@ -10,11 +10,12 @@ _ = builder.Services.AddSingleton<ICryptoHelper, CryptoHelper>();
 _ = builder.Services.AddSingleton<INotesHandler, CryptoNotesHandler>();
 _ = builder.Services.AddSingleton<INotesHandler, InMemoryNotesHandler>();
 _ = builder.Services.Decorate<INotesHandler, CryptoNotesHandler>();
-builder.Services.Configure<CryptoOptions>(
-    builder.Configuration.GetSection("Crypto"));
-
+_ = builder.Services
+    .AddOptions<CryptoOptions>()
+    .Bind(builder.Configuration.GetSection("Crypto"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 var app = builder.Build();
-
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -30,7 +31,6 @@ app.MapPost("/notes",
         await handler.AddNoteAsync(Note.Create(note), token).ConfigureAwait(false);
         return Results.Ok(new CreateNoteResponse(internalNote.Id.Value));
     });
-
 app.MapDelete("/notes/{id:guid}", async (Guid id, INotesHandler handler, CancellationToken token) =>
 {
     var noteId = new NoteId(id);
@@ -41,13 +41,11 @@ app.MapDelete("/notes/{id:guid}", async (Guid id, INotesHandler handler, Cancell
     }
     return Results.Ok(new { id, note = note.Content });
 });
-
 app.MapGet("/hc", () => Results.Ok(new { status = "healthy" }));
 app.MapGet("/stat", async (INotesHandler handler, CancellationToken token) =>
 {
     var count = await handler.GetNotesCountAsync(token);
     var encryptionEnabled = handler is CryptoNotesHandler;
-
     return Results.Ok(new StatResponse(count, encryptionEnabled));
 });
 
