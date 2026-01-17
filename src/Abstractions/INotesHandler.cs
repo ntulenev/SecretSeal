@@ -1,4 +1,5 @@
 ﻿using Models;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Abstractions
 {
@@ -18,15 +19,13 @@ namespace Abstractions
         Task AddNoteAsync(Note note, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Attempts to asynchronously retrieve a note by its identifier.
+        /// Asynchronously retrieves the note associated with the specified identifier.
         /// </summary>
         /// <param name="noteId">The unique identifier of the note to retrieve.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
-        /// <param name="note">When this method returns, contains the note associated with the specified identifier, if found; otherwise,
-        /// the default value for <see cref="Note"/>.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the note was
-        /// found and retrieved successfully; otherwise, <see langword="false"/>.</returns>
-        Task<bool> TryReadNoteAsync(NoteId noteId, CancellationToken cancellationToken, out Note note);
+        /// <param name="cancellationToken">A token that can be used to cancel the asynchronous operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the note if found; otherwise,
+        /// null.</returns>
+        Task<Note?> TakeNoteAsync(NoteId noteId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asynchronously retrieves the total number of notes available.
