@@ -1,6 +1,9 @@
-﻿using Abstractions;
+using Abstractions;
+
 using Cryptography.Configuration;
+
 using Microsoft.Extensions.Options;
+
 using System.Security.Cryptography;
 using System.Text;
 
@@ -49,12 +52,12 @@ public class CryptoHelper : ICryptoHelper
         ArgumentNullException.ThrowIfNull(cipherText);
         return DecryptWithIvPrefix(cipherText, _options);
     }
-    
+
     private static string EncryptWithRandomIv(string plainText, CryptoOptions options)
     {
         var key = GetKeyBytes(options);
 
-        Span<byte> iv = stackalloc byte[IvSizeBytes];
+        Span<byte> iv = stackalloc byte[IV_SIZE_BYTES];
         RandomNumberGenerator.Fill(iv);
 
         using var aes = Aes.Create();
@@ -62,16 +65,16 @@ public class CryptoHelper : ICryptoHelper
         aes.IV = iv.ToArray(); // aes.IV expects byte[]
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.PKCS7;
-        
-        using ICryptoTransform encryptor = aes.CreateEncryptor();
+
+        using var encryptor = aes.CreateEncryptor();
 
         var inputBytes = Encoding.UTF8.GetBytes(plainText);
         var cipherBytes = encryptor.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
 
         // Store: IV || CIPHERTEXT
-        var combined = new byte[IvSizeBytes + cipherBytes.Length];
-        iv.CopyTo(combined.AsSpan(0, IvSizeBytes));
-        Buffer.BlockCopy(cipherBytes, 0, combined, IvSizeBytes, cipherBytes.Length);
+        var combined = new byte[IV_SIZE_BYTES + cipherBytes.Length];
+        iv.CopyTo(combined.AsSpan(0, IV_SIZE_BYTES));
+        Buffer.BlockCopy(cipherBytes, 0, combined, IV_SIZE_BYTES, cipherBytes.Length);
 
         return Convert.ToBase64String(combined);
     }
@@ -81,14 +84,16 @@ public class CryptoHelper : ICryptoHelper
         var key = GetKeyBytes(options);
 
         var combined = Convert.FromBase64String(combinedBase64);
-        if (combined.Length <= IvSizeBytes)
+        if (combined.Length <= IV_SIZE_BYTES)
+        {
             throw new CryptographicException("Encrypted payload is too short.");
+        }
 
-        var iv = new byte[IvSizeBytes];
-        Buffer.BlockCopy(combined, 0, iv, 0, IvSizeBytes);
+        var iv = new byte[IV_SIZE_BYTES];
+        Buffer.BlockCopy(combined, 0, iv, 0, IV_SIZE_BYTES);
 
-        var cipher = new byte[combined.Length - IvSizeBytes];
-        Buffer.BlockCopy(combined, IvSizeBytes, cipher, 0, cipher.Length);
+        var cipher = new byte[combined.Length - IV_SIZE_BYTES];
+        Buffer.BlockCopy(combined, IV_SIZE_BYTES, cipher, 0, cipher.Length);
 
         using var aes = Aes.Create();
         aes.Key = key;
@@ -105,21 +110,22 @@ public class CryptoHelper : ICryptoHelper
     private static byte[] GetKeyBytes(CryptoOptions options)
     {
         if (string.IsNullOrWhiteSpace(options.Key))
+        {
             throw new InvalidOperationException("Crypto:Key is not configured.");
+        }
 
         var keyBytes = Encoding.UTF8.GetBytes(options.Key);
 
-        if (keyBytes.Length != KeySizeBytes)
-            throw new InvalidOperationException(
-                $"Crypto:Key must be exactly {KeySizeBytes} bytes for AES-256. " +
-                $"Current: {keyBytes.Length} bytes.");
-
-        return keyBytes;
+        return keyBytes.Length != KEY_SIZE_BYTES
+            ? throw new InvalidOperationException(
+                $"Crypto:Key must be exactly {KEY_SIZE_BYTES} bytes for AES-256. " +
+                $"Current: {keyBytes.Length} bytes.")
+            : keyBytes;
     }
 
 
-    private const int IvSizeBytes = 16; // AES block size = 128 bits
-    private const int KeySizeBytes = 32; // AES-256
+    private const int IV_SIZE_BYTES = 16; // AES block size = 128 bits
+    private const int KEY_SIZE_BYTES = 32; // AES-256
     private readonly CryptoOptions _options;
 }
 #pragma warning restore CA5401
