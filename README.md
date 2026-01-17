@@ -11,7 +11,7 @@ Unlike public services, SecretSeal runs on **your own hosting**, so you always k
 ### ✨ Features
 - 🗝️ One-time secret messages (read once, then gone)
 - 🏠 Self-hosted — you own the infrastructure and data
-- 🚫 No ads, no tracking, no analytics
+- 🚫 No ads, no tracking
 - 🤝 Perfect for personal use and sharing secrets with friends
 
 ### 🔐 Encryption
@@ -29,6 +29,26 @@ Notes are stored **encrypted** using **AES-256**.
   }
 }
 ```
+
+### 📊 Statistics
+
+**GET `/stat`**
+
+Returns basic runtime statistics.
+
+```json
+{
+  "notesCount": 3,
+  "encryptionEnabled": true
+}
+```
+
+| Field | Description |
+|------|-------------|
+| notesCount | Total number of stored notes |
+| encryptionEnabled | Indicates whether notes are stored in the system in encrypted or plain text form |
+
+
 
 ### ⚠️ Early MVP Notice
 
