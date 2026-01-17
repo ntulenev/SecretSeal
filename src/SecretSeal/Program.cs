@@ -26,8 +26,8 @@ app.UseStaticFiles();
 app.MapPost("/notes",
     async (CreateNoteRequest req, INotesHandler handler, CancellationToken token) =>
     {
-        var note = (req.Note ?? string.Empty).Trim();
-        if (note.Length == 0)
+        var note = req.Note?.Trim();
+        if (string.IsNullOrEmpty(note))
         {
             return Results.BadRequest(new { error = "Note must not be empty." });
         }
