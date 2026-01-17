@@ -50,16 +50,17 @@ public sealed class NotesRepository : IRepository<Note, NoteId>
     public async Task<Note?> ConsumeAsync(NoteId id, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(id);
-
-        var row = await _dbContext.Set<DeletedNoteRow>()
+        var rows = await _dbContext.Set<DeletedNoteRow>()
             .FromSqlRaw("""
-            DELETE FROM Notes
-            OUTPUT DELETED.Id, DELETED.Content
-            WHERE Id = {0};
-        """, id.Value)
+                            DELETE FROM Notes
+                            OUTPUT DELETED.Id, DELETED.Content
+                            WHERE Id = {0};
+                        """, id.Value)
             .AsNoTracking()
-            .FirstOrDefaultAsync(cancellationToken)
+            .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+
+        var row = rows.FirstOrDefault();
 
         return row is null
             ? null
