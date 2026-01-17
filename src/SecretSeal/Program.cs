@@ -1,8 +1,12 @@
 using Abstractions;
+
 using Cryptography;
 using Cryptography.Configuration;
+
 using Logic;
+
 using Models;
+
 using Transport;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,7 +38,7 @@ app.MapPost("/notes",
 app.MapDelete("/notes/{id:guid}", async (Guid id, INotesHandler handler, CancellationToken token) =>
 {
     var noteId = new NoteId(id);
-    var note = await handler.TakeNoteAsync(noteId, token);
+    var note = await handler.TakeNoteAsync(noteId, token).ConfigureAwait(false);
     if (note is null)
     {
         return Results.NotFound(new { error = "Note not found (or already consumed)." });
@@ -44,7 +48,7 @@ app.MapDelete("/notes/{id:guid}", async (Guid id, INotesHandler handler, Cancell
 app.MapGet("/hc", () => Results.Ok(new { status = "healthy" }));
 app.MapGet("/stat", async (INotesHandler handler, CancellationToken token) =>
 {
-    var count = await handler.GetNotesCountAsync(token);
+    var count = await handler.GetNotesCountAsync(token).ConfigureAwait(false);
     var encryptionEnabled = handler is CryptoNotesHandler;
     return Results.Ok(new StatResponse(count, encryptionEnabled));
 });
