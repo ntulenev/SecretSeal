@@ -19,6 +19,10 @@
 	</ItemGroup>
 
 	<PropertyGroup>
+		<NoWarn>CS1591,IDE0058</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup>
 		<NuGetAuditMode>all</NuGetAuditMode>
 	</PropertyGroup>
 
