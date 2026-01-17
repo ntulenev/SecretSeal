@@ -11,6 +11,7 @@ Unlike public services, SecretSeal runs on **your own hosting**, so you always k
 ### ✨ Features
 - 🗝️ One-time secret messages (read once, then gone)
 - 🏠 Self-hosted — you own the infrastructure and data
+- 💾 Flexible storage — choose between InMemory mode or a database storage
 - 🚫 No ads, no tracking
 - 🤝 Perfect for personal use and sharing secrets with friends
 
@@ -23,11 +24,16 @@ Notes are stored **encrypted** using **AES-256**.
 - Protects against accidental disclosure (logs, memory dumps, debugging, crashes)
 
 ```json
-{
+  "Storage": {
+    "Mode": "InMemory"
+    // "Mode": "Database"
+  },
+  "ConnectionStrings": {
+    "SecretSealDb": "Server=localhost\\SQLEXPRESS;..."
+  },
   "Crypto": {
     "Key": "32-byte-secret-key"
-  }
-}
+  },
 ```
 
 ### 📊 Statistics
@@ -39,7 +45,8 @@ Returns basic runtime statistics.
 ```json
 {
   "notesCount": 3,
-  "encryptionEnabled": true
+  "encryptionEnabled": true,
+  "isInMemory": true
 }
 ```
 
@@ -47,13 +54,4 @@ Returns basic runtime statistics.
 |------|-------------|
 | notesCount | Total number of stored notes |
 | encryptionEnabled | Indicates whether notes are stored in the system in encrypted or plain text form |
-
-
-
-### ⚠️ Early MVP Notice
-
-The current implementation is an early MVP.
-
-All data is stored **in memory** and therefore **does not survive application restarts**.
-
-This version is intended for **immediate secret sharing**, not for storing links to be accessed later.
+| isInMemory | Indicates whether the application is currently using in-memory storage instead of a database |
