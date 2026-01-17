@@ -13,7 +13,8 @@ public sealed class StatResponseTests
         //Arrage
         const long notesCount = 42;
         const bool encryptionEnabled = true;
-        var response = new StatResponse(notesCount, encryptionEnabled);
+        const bool inMemory = true;
+        var response = new StatResponse(notesCount, encryptionEnabled, inMemory);
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -23,6 +24,6 @@ public sealed class StatResponseTests
         var json = JsonSerializer.Serialize(response, options);
 
         //Assert
-        json.Should().Be(/*lang=json,strict*/ "{\"notesCount\":42,\"encryptionEnabled\":true}");
+        json.Should().Be(/*lang=json,strict*/ "{\"notesCount\":42,\"encryptionEnabled\":true,\"isInMemory\":true}");
     }
 }
