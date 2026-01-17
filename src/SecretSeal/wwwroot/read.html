@@ -105,9 +105,46 @@
             cursor: pointer;
         }
 
-            .logo a:hover {
-                text-decoration: underline;
-            }
+        .logo a:hover {
+            text-decoration: underline;
+        }
+
+        .source-link {
+            font-size: 15px;
+            font-weight: 700;
+            color: #38bdf8;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid #334155;
+            background: rgba(2, 6, 23, 0.4);
+            transition: all 120ms ease;
+        }
+
+        .source-link:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: #38bdf8;
+            color: #7dd3fc;
+            transform: translateY(-1px);
+        }
+
+        footer {
+            margin-top: 40px;
+            padding-bottom: 16px;
+            text-align: center;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .footer-text {
+            opacity: 0.7;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -134,7 +171,18 @@
     </section>
 
     <footer>
-        SecretSeal 🦭 — read once, vanish forever
+        <div class="footer-inner">
+            <div class="footer-text">
+                SecretSeal 🦭 — read once, vanish forever
+            </div>
+
+            <a class="source-link"
+               href="https://github.com/ntulenev/SecretSeal"
+               target="_blank"
+               rel="noopener noreferrer">
+                ⚙️ Project source on GitHub
+            </a>
+        </div>
     </footer>
 
     <script>
