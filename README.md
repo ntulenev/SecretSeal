@@ -25,6 +25,7 @@ Notes are stored **encrypted** using **AES-256**.
 
 ```json
   "Storage": {
+    "MaxNoteLength": 4000
     "Mode": "InMemory"
     // "Mode": "Database"
   },
