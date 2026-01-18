@@ -35,6 +35,12 @@ internal static class StartupHelpers
         var builder = WebApplication.CreateBuilder(args);
         _ = builder.Services.AddSingleton<ICryptoHelper, CryptoHelper>();
         _ = builder.Services
+            .AddOptions<StorageOptions>()
+            .Bind(builder.Configuration.GetSection("Storage"))
+            .Validate(o => o.MaxNoteLength is null or > 0,
+                "Storage:MaxNoteLength must be a positive integer.")
+            .ValidateOnStart();
+        _ = builder.Services
             .AddOptions<CryptoOptions>()
             .Bind(builder.Configuration.GetSection("Crypto"))
             .ValidateDataAnnotations()
