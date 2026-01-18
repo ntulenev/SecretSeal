@@ -46,6 +46,23 @@ public sealed class SecretSealApiTests
         payload.GetProperty("error").GetString().Should().Be("Note must not be empty.");
     }
 
+    [Fact(DisplayName = "POST /notes rejects long note")]
+    [Trait("Category", "Integration")]
+    public async Task CreateNoteWhenNoteIsBigReturnsBadRequest()
+    {
+        //Arrage
+        using var factory = CreateFactory();
+        using var client = factory.CreateClient();
+
+        //Act
+        var response = await client.PostAsJsonAsync("/notes", new { note = "0123456789ABCDFX" });
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        payload.GetProperty("error").GetString().Should().Be("Note must not be longer than 15 characters.");
+    }
+
     [Fact(DisplayName = "POST /notes returns id and DELETE /notes/{id} returns note content")]
     [Trait("Category", "Integration")]
     public async Task CreateThenDeleteReturnsNoteContent()
@@ -120,7 +137,9 @@ public sealed class SecretSealApiTests
             {
                 var settings = new Dictionary<string, string?>
                 {
-                    ["Crypto:Key"] = "12345678901234567890123456789012"
+                    ["Crypto:Key"] = "12345678901234567890123456789012",
+                    ["Storage:Mode"] = "InMemory",
+                    ["Storage:MaxNoteLength"] = "15"
                 };
 
                 config.AddInMemoryCollection(settings);
