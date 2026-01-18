@@ -2,6 +2,7 @@ using Abstractions;
 
 using Logic;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -18,13 +19,23 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.MapPost("/notes",
-    async (CreateNoteRequest req, INotesHandler handler, CancellationToken token) =>
+    async (CreateNoteRequest req,
+           IOptions<StorageOptions> storageOptions,
+           INotesHandler handler,
+           CancellationToken token) =>
     {
         var note = req.Note?.Trim();
         if (string.IsNullOrEmpty(note))
         {
             return Results.BadRequest(new { error = "Note must not be empty." });
         }
+
+        var max = storageOptions.Value.MaxNoteLength;
+        if (max is not null && note.Length > max.Value)
+        {
+            return Results.BadRequest(new { error = $"Note must not be longer than {max.Value} characters." });
+        }
+
         var internalNote = Note.Create(note);
         await handler.AddNoteAsync(internalNote, token).ConfigureAwait(false);
         return Results.Ok(new CreateNoteResponse(internalNote.Id.Value));
