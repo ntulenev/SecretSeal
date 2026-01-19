@@ -15,6 +15,7 @@ using Transport;
 
 using var app = StartupHelpers.CreateApplication(args);
 
+app.UseOutputCache();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -60,7 +61,8 @@ app.MapGet("/stat", async (INotesHandler handler, CancellationToken token, IOpti
     var encryptionEnabled = handler is CryptoNotesHandler;
     var isInMemory = storageMode.Value.Mode == StorageMode.InMemory;
     return Results.Ok(new StatResponse(count, encryptionEnabled, isInMemory));
-});
+})
+.CacheOutput("stat-1m");
 
 await StartupHelpers.RunAppAsync(app).ConfigureAwait(false);
 

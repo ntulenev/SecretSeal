@@ -46,6 +46,9 @@ internal static class StartupHelpers
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        _ = builder.Services.AddOutputCache(options =>
+                    options.AddPolicy("stat-1m", p => p.Expire(TimeSpan.FromMinutes(1))));
+
         var storageOption = builder.Configuration
                     .GetSection("Storage")
                     .Get<StorageOptions>()
