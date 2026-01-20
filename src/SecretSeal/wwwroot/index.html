@@ -219,7 +219,7 @@
         <div id="createShare" style="display:none;">
             <div class="row">
                 <div class="pill" id="guidBox"></div>
-                <button class="copy-btn" type="button" onclick="copyFrom('guidBox')">Copy GUID</button>
+                <button class="copy-btn" type="button" onclick="copyFrom('guidBox')">Copy ID</button>
             </div>
 
             <div class="row">
@@ -230,13 +230,13 @@
             <div class="mini">Share the link with a friend. It will ask for confirmation, then read & destroy the secret.</div>
         </div>
 
-        <div class="hint">Creates a one-time note and returns a GUID you can share.</div>
+        <div class="hint">Creates a one-time note and returns a ID you can share.</div>
     </section>
 
     <section>
         <h2>🔥 Read & destroy a secret</h2>
 
-        <input id="readId" placeholder="Enter secret GUID" />
+        <input id="readId" placeholder="Enter secret ID" />
         <div class="actions">
             <button id="readBtn" type="button" onclick="readNote()">Read & Destroy</button>
         </div>
@@ -355,7 +355,7 @@
                 const id = data.id;
                 const link = `${window.location.origin}/read.html?id=${encodeURIComponent(id)}`;
 
-                setResult(result, "success", "Secret created! Share it using GUID or link below:");
+                setResult(result, "success", "Secret created! Share it using ID or link below:");
 
                 guidBox.textContent = id;
                 linkBox.textContent = link;
@@ -380,7 +380,7 @@
             const id = (idInput.value || "").trim();
 
             if (!id) {
-                setResult(result, "error", "GUID is required");
+                setResult(result, "error", "ID is required");
                 return;
             }
 
