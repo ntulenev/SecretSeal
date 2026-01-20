@@ -10,34 +10,29 @@ using Models;
 
 using SecretSeal.Configuration;
 using SecretSeal.Startup;
+using SecretSeal.Validation;
 
 using Transport;
 
 using var app = StartupHelpers.CreateApplication(args);
-
 app.UseOutputCache();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.MapPost("/notes",
     async (CreateNoteRequest req,
-           IOptions<StorageOptions> storageOptions,
+           INoteValidator validator,
            INotesHandler handler,
            CancellationToken token) =>
     {
-        var note = req.Note?.Trim();
-        if (string.IsNullOrEmpty(note))
+        var result = validator.Validate(req.Note);
+
+        if (!result.IsValid)
         {
-            return Results.BadRequest(new { error = "Note must not be empty." });
+            return Results.BadRequest(new { error = result.Error });
         }
 
-        var max = storageOptions.Value.MaxNoteLength;
-        if (max is not null && note.Length > max.Value)
-        {
-            return Results.BadRequest(new { error = $"Note must not be longer than {max.Value} characters." });
-        }
-
-        var internalNote = Note.Create(note);
+        var internalNote = Note.Create(result.NormalizedNote!);
         await handler.AddNoteAsync(internalNote, token).ConfigureAwait(false);
         return Results.Ok(new CreateNoteResponse(internalNote.Id.Value));
     });
