@@ -1,9 +1,9 @@
-namespace SecretSeal.Validation;
+namespace Transport.Validation;
 
 /// <summary>
 /// Provides validation logic for note input received from transport layer.
 /// </summary>
-internal interface INoteValidator
+public interface INoteValidator
 {
     /// <summary>
     /// Validates and normalizes the provided note content.
