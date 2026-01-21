@@ -139,7 +139,7 @@ public sealed class SecretSealApiTests
                 {
                     ["Crypto:Key"] = "12345678901234567890123456789012",
                     ["Storage:Mode"] = "InMemory",
-                    ["Storage:MaxNoteLength"] = "15"
+                    ["Validation:MaxNoteLength"] = "15"
                 };
 
                 config.AddInMemoryCollection(settings);
