@@ -12,10 +12,12 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 
 using SecretSeal.Configuration;
-using SecretSeal.Validation;
 
 using Storage;
 using Storage.Repositories;
+
+using Transport.Configuration;
+using Transport.Validation;
 
 namespace SecretSeal.Startup;
 
@@ -56,9 +58,14 @@ internal static class StartupHelpers
         _ = builder.Services
             .AddOptions<StorageOptions>()
             .Bind(builder.Configuration.GetSection("Storage"))
+            .ValidateOnStart();
+
+        _ = builder.Services
+            .AddOptions<NoteValidationOptions>()
+            .Bind(builder.Configuration.GetSection("Validation"))
             .Validate(
                 o => o.MaxNoteLength is null or > 0,
-                "Storage:MaxNoteLength must be a positive integer.")
+                "Validation:MaxNoteLength must be a positive integer.")
             .ValidateOnStart();
 
         _ = builder.Services
