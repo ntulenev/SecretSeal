@@ -30,7 +30,7 @@ Notes are stored **encrypted** using **AES-256**.
     // "Mode": "InMemory"
   },
   "Validation": {
-    "MaxNoteLength": 4000
+    "MaxNoteLength": 4000 // Optional content length limitation
   },
   "ConnectionStrings": {
     "SecretSealDb": "Server=localhost\\SQLEXPRESS;..."
