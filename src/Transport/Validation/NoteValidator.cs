@@ -1,23 +1,23 @@
 using Microsoft.Extensions.Options;
 
-using SecretSeal.Configuration;
+using Transport.Configuration;
 
-namespace SecretSeal.Validation;
+namespace Transport.Validation;
 
 /// <summary>
 /// Default implementation of <see cref="INoteValidator"/>.
 /// </summary>
-internal sealed class NoteValidator : INoteValidator
+public sealed class NoteValidator : INoteValidator
 {
-    private readonly StorageOptions _options;
+    private readonly NoteValidationOptions _options;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NoteValidator"/> class.
     /// </summary>
     /// <param name="options">
-    /// Storage configuration containing note length limits.
+    /// Validation configuration containing note length limits.
     /// </param>
-    public NoteValidator(IOptions<StorageOptions> options)
+    public NoteValidator(IOptions<NoteValidationOptions> options)
     {
         ArgumentNullException.ThrowIfNull(options);
         _options = options.Value;
@@ -36,11 +36,13 @@ internal sealed class NoteValidator : INoteValidator
 
         var max = _options.MaxNoteLength;
 
+#pragma warning disable IDE0046 // Convert to conditional expression
         if (max is not null && normalized.Length > max.Value)
         {
             return NoteValidationResult.Fail(
                 $"Note must not be longer than {max.Value} characters.");
         }
+#pragma warning restore IDE0046 // Convert to conditional expression
 
         return NoteValidationResult.Success(normalized);
     }
