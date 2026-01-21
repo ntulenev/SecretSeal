@@ -1,4 +1,4 @@
-namespace SecretSeal.Validation;
+namespace Transport.Validation;
 
 /// <summary>
 /// Represents the result of note validation.
@@ -12,7 +12,7 @@ namespace SecretSeal.Validation;
 /// <param name="NormalizedNote">
 /// Trimmed and normalized note value when validation succeeds; otherwise <c>null</c>.
 /// </param>
-internal sealed record NoteValidationResult(
+public sealed record NoteValidationResult(
     bool IsValid,
     string? Error,
     string? NormalizedNote)
