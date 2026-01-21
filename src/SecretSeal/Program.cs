@@ -10,9 +10,9 @@ using Models;
 
 using SecretSeal.Configuration;
 using SecretSeal.Startup;
-using SecretSeal.Validation;
 
 using Transport;
+using Transport.Validation;
 
 using var app = StartupHelpers.CreateApplication(args);
 app.UseOutputCache();
