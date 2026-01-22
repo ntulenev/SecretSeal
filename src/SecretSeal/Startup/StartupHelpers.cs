@@ -12,11 +12,13 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 
 using SecretSeal.Configuration;
+using SecretSeal.Routing;
 
 using Storage;
 using Storage.Repositories;
 
 using Transport.Configuration;
+using Transport.Serialization;
 using Transport.Validation;
 
 namespace SecretSeal.Startup;
@@ -36,6 +38,7 @@ internal static class StartupHelpers
         var builder = WebApplication.CreateBuilder(args);
 
         ConfigureOptions(builder);
+        RegisterRouting(builder);
         RegisterServices(builder);
         ConfigureCache(builder);
 
@@ -51,6 +54,12 @@ internal static class StartupHelpers
     {
         await EnsureDatabaseCreatedIfNeededAsync(app).ConfigureAwait(false);
         await app.RunAsync().ConfigureAwait(false);
+    }
+
+    private static void RegisterRouting(WebApplicationBuilder builder)
+    {
+        _ = builder.Services.Configure<RouteOptions>(o => o.ConstraintMap["ShortGuid"] = typeof(ShortGuidRouteConstraint));
+        _ = builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new ShortGuidJsonConverter()));
     }
 
     private static void ConfigureOptions(WebApplicationBuilder builder)
