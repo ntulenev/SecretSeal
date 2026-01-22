@@ -8,6 +8,8 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
+using Transport;
+
 namespace SecretSeal.Tests;
 
 public sealed class SecretSealApiTests
@@ -16,7 +18,7 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task GetHealthCheckReturnsHealthyStatus()
     {
-        //Arrage
+        //Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
 
@@ -33,7 +35,7 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task CreateNoteWhenNoteIsEmptyReturnsBadRequest()
     {
-        //Arrage
+        //Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
 
@@ -50,7 +52,7 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task CreateNoteWhenNoteIsBigReturnsBadRequest()
     {
-        //Arrage
+        //Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
 
@@ -67,7 +69,7 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task CreateThenDeleteReturnsNoteContent()
     {
-        //Arrage
+        //Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
         var note = "keep it safe";
@@ -75,16 +77,16 @@ public sealed class SecretSealApiTests
         //Act
         var createResponse = await client.PostAsJsonAsync("/notes", new { note });
         var createPayload = await createResponse.Content.ReadFromJsonAsync<JsonElement>();
-        var noteId = createPayload.GetProperty("id").GetGuid();
+        var noteId = createPayload.GetProperty("id").GetString();
 
         var deleteResponse = await client.DeleteAsync($"/notes/{noteId}");
         var deletePayload = await deleteResponse.Content.ReadFromJsonAsync<JsonElement>();
 
         //Assert
         createResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        noteId.Should().NotBe(Guid.Empty);
+        noteId.Should().NotBe(string.Empty);
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        deletePayload.GetProperty("id").GetGuid().Should().Be(noteId);
+        deletePayload.GetProperty("id").GetString().Should().Be(noteId);
         deletePayload.GetProperty("note").GetString().Should().Be(note);
     }
 
@@ -92,10 +94,10 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task DeleteWhenNoteDoesNotExistReturnsNotFound()
     {
-        //Arrage
+        //Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
-        var noteId = Guid.NewGuid();
+        var noteId = ShortGuid.FromGuid(Guid.NewGuid()).ToString();
 
         //Act
         var response = await client.DeleteAsync($"/notes/{noteId}");
@@ -110,7 +112,7 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task GetStatsReturnsCountAndEncryptionFlag()
     {
-        //Arrage
+        //Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
 
