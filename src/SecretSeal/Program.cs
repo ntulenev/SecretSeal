@@ -2,8 +2,6 @@ using Abstractions;
 
 using Logic;
 
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 using Models;
@@ -37,7 +35,7 @@ app.MapPost("/notes",
         return Results.Ok(new CreateNoteResponse(internalNote.Id.Value));
     });
 
-app.MapDelete("/notes/{id:guid}", async (Guid id, INotesHandler handler, CancellationToken token) =>
+app.MapDelete("/notes/{id:ShortGuid}", async (ShortGuid id, INotesHandler handler, CancellationToken token) =>
 {
     var noteId = new NoteId(id);
     var note = await handler.TakeNoteAsync(noteId, token).ConfigureAwait(false);
