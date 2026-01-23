@@ -10,7 +10,7 @@ public sealed class StatResponseTests
     [Trait("Category", "Unit")]
     public void SerializeUsesCamelCaseProperties()
     {
-        //Arrage
+        // Arrange
         const long notesCount = 42;
         const bool encryptionEnabled = true;
         const bool inMemory = true;
@@ -20,10 +20,10 @@ public sealed class StatResponseTests
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        //Act
+        // Act
         var json = JsonSerializer.Serialize(response, options);
 
-        //Assert
+        // Assert
         json.Should().Be(/*lang=json,strict*/ "{\"notesCount\":42,\"encryptionEnabled\":true,\"isInMemory\":true}");
     }
 }

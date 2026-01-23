@@ -10,15 +10,15 @@ public sealed class InMemoryNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task AddNoteAsyncWhenNoteIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var handler = new InMemoryNotesHandler();
         Note note = null!;
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         Func<Task> act = () => handler.AddNoteAsync(note, cancellationToken);
 
-        //Assert
+        // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -26,17 +26,17 @@ public sealed class InMemoryNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task AddNoteAsyncAddsNoteAndCountReturnsOne()
     {
-        //Arrage
+        // Arrange
         var handler = new InMemoryNotesHandler();
         var noteId = new NoteId(Guid.NewGuid());
         var note = new Note(noteId, "content");
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         await handler.AddNoteAsync(note, cancellationToken);
         var count = await handler.GetNotesCountAsync(cancellationToken);
 
-        //Assert
+        // Assert
         count.Should().Be(1);
     }
 
@@ -46,19 +46,19 @@ public sealed class InMemoryNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task AddNoteAsyncReplacesNoteWithSameId()
     {
-        //Arrage
+        // Arrange
         var handler = new InMemoryNotesHandler();
         var noteId = new NoteId(Guid.NewGuid());
         var first = new Note(noteId, "first");
         var second = new Note(noteId, "second");
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         await handler.AddNoteAsync(first, cancellationToken);
         await handler.AddNoteAsync(second, cancellationToken);
         var result = await handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().NotBeNull();
         result!.Content.Should().Be("second");
     }
@@ -67,15 +67,15 @@ public sealed class InMemoryNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncWhenNoteIdIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var handler = new InMemoryNotesHandler();
         NoteId noteId = null!;
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         Func<Task> act = () => handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -83,15 +83,15 @@ public sealed class InMemoryNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncReturnsNullWhenNoteDoesNotExist()
     {
-        //Arrage
+        // Arrage
         var handler = new InMemoryNotesHandler();
         var noteId = new NoteId(Guid.NewGuid());
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         var result = await handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().BeNull();
     }
 
@@ -99,7 +99,7 @@ public sealed class InMemoryNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncRemovesAndReturnsStoredNote()
     {
-        //Arrage
+        // Arrange
         var handler = new InMemoryNotesHandler();
         var noteId = new NoteId(Guid.NewGuid());
         var note = new Note(noteId, "content");
@@ -107,11 +107,11 @@ public sealed class InMemoryNotesHandlerTests
 
         await handler.AddNoteAsync(note, cancellationToken);
 
-        //Act
+        // Act
         var result = await handler.TakeNoteAsync(noteId, cancellationToken);
         var count = await handler.GetNotesCountAsync(cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().NotBeNull();
         result!.Id.Should().Be(noteId);
         result.Content.Should().Be("content");

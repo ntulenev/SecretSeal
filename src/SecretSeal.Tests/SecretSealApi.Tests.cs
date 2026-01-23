@@ -18,15 +18,15 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task GetHealthCheckReturnsHealthyStatus()
     {
-        //Arrange
+        // Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
 
-        //Act
+        // Act
         var response = await client.GetAsync("/hc");
         var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         payload.GetProperty("status").GetString().Should().Be("healthy");
     }
@@ -35,15 +35,15 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task CreateNoteWhenNoteIsEmptyReturnsBadRequest()
     {
-        //Arrange
+        // Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
 
-        //Act
+        // Act
         var response = await client.PostAsJsonAsync("/notes", new { note = "   " });
         var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         payload.GetProperty("error").GetString().Should().Be("Note must not be empty.");
     }
@@ -52,15 +52,15 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task CreateNoteWhenNoteIsBigReturnsBadRequest()
     {
-        //Arrange
+        // Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
 
-        //Act
+        // Act
         var response = await client.PostAsJsonAsync("/notes", new { note = "0123456789ABCDFX" });
         var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         payload.GetProperty("error").GetString().Should().Be("Note must not be longer than 15 characters.");
     }
@@ -69,12 +69,12 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task CreateThenDeleteReturnsNoteContent()
     {
-        //Arrange
+        // Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
         var note = "keep it safe";
 
-        //Act
+        // Act
         var createResponse = await client.PostAsJsonAsync("/notes", new { note });
         var createPayload = await createResponse.Content.ReadFromJsonAsync<JsonElement>();
         var noteId = createPayload.GetProperty("id").GetString();
@@ -82,7 +82,7 @@ public sealed class SecretSealApiTests
         var deleteResponse = await client.DeleteAsync($"/notes/{noteId}");
         var deletePayload = await deleteResponse.Content.ReadFromJsonAsync<JsonElement>();
 
-        //Assert
+        // Assert
         createResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         noteId.Should().NotBe(string.Empty);
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -94,16 +94,16 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task DeleteWhenNoteDoesNotExistReturnsNotFound()
     {
-        //Arrange
+        // Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
         var noteId = ShortGuid.FromGuid(Guid.NewGuid()).ToString();
 
-        //Act
+        // Act
         var response = await client.DeleteAsync($"/notes/{noteId}");
         var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         payload.GetProperty("error").GetString().Should().Be("Note not found (or already consumed).");
     }
@@ -112,18 +112,18 @@ public sealed class SecretSealApiTests
     [Trait("Category", "Integration")]
     public async Task GetStatsReturnsCountAndEncryptionFlag()
     {
-        //Arrange
+        // Arrange
         using var factory = CreateFactory();
         using var client = factory.CreateClient();
 
         await client.PostAsJsonAsync("/notes", new { note = "one" });
         await client.PostAsJsonAsync("/notes", new { note = "two" });
 
-        //Act
+        // Act
         var response = await client.GetAsync("/stat");
         var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         payload.GetProperty("notesCount").GetInt64().Should().Be(2);
         payload.GetProperty("encryptionEnabled").GetBoolean().Should().BeTrue();

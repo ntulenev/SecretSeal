@@ -14,13 +14,13 @@ public sealed class CryptoHelperTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenOptionsIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         IOptions<CryptoOptions> options = null!;
 
-        //Act
+        // Act
         Action act = () => _ = new CryptoHelper(options);
 
-        //Assert
+        // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -28,14 +28,14 @@ public sealed class CryptoHelperTests
     [Trait("Category", "Unit")]
     public void EncryptWhenPlainTextIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var helper = CreateHelper();
         string plainText = null!;
 
-        //Act
+        // Act
         Action act = () => _ = helper.Encrypt(plainText);
 
-        //Assert
+        // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -43,14 +43,14 @@ public sealed class CryptoHelperTests
     [Trait("Category", "Unit")]
     public void DecryptWhenCipherTextIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var helper = CreateHelper();
         string cipherText = null!;
 
-        //Act
+        // Act
         Action act = () => _ = helper.Decrypt(cipherText);
 
-        //Assert
+        // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -58,14 +58,14 @@ public sealed class CryptoHelperTests
     [Trait("Category", "Unit")]
     public void EncryptWhenKeyIsNullOrWhitespaceThrowsInvalidOperationException()
     {
-        //Arrage
+        // Arrange
         var options = Options.Create(new CryptoOptions { Key = "   " });
         var helper = new CryptoHelper(options);
 
-        //Act
+        // Act
         Action act = () => _ = helper.Encrypt("data");
 
-        //Assert
+        // Assert
         act.Should().Throw<InvalidOperationException>();
     }
 
@@ -73,14 +73,14 @@ public sealed class CryptoHelperTests
     [Trait("Category", "Unit")]
     public void EncryptWhenKeyLengthIsInvalidThrowsInvalidOperationException()
     {
-        //Arrage
+        // Arrange
         var options = Options.Create(new CryptoOptions { Key = "short-key" });
         var helper = new CryptoHelper(options);
 
-        //Act
+        // Act
         Action act = () => _ = helper.Encrypt("data");
 
-        //Assert
+        // Assert
         act.Should().Throw<InvalidOperationException>();
     }
 
@@ -88,14 +88,14 @@ public sealed class CryptoHelperTests
     [Trait("Category", "Unit")]
     public void DecryptWhenPayloadIsTooShortThrowsCryptographicException()
     {
-        //Arrage
+        // Arrange
         var helper = CreateHelper();
         var shortPayload = Convert.ToBase64String(new byte[10]);
 
-        //Act
+        // Act
         Action act = () => _ = helper.Decrypt(shortPayload);
 
-        //Assert
+        // Assert
         act.Should().Throw<CryptographicException>();
     }
 
@@ -103,15 +103,15 @@ public sealed class CryptoHelperTests
     [Trait("Category", "Unit")]
     public void EncryptThenDecryptReturnsOriginalPlainText()
     {
-        //Arrage
+        // Arrange
         var helper = CreateHelper();
         var plainText = "secret note";
 
-        //Act
+        // Act
         var cipherText = helper.Encrypt(plainText);
         var decrypted = helper.Decrypt(cipherText);
 
-        //Assert
+        // Assert
         cipherText.Should().NotBeNullOrWhiteSpace();
         decrypted.Should().Be(plainText);
     }
@@ -120,15 +120,15 @@ public sealed class CryptoHelperTests
     [Trait("Category", "Unit")]
     public void EncryptSameInputProducesDifferentCipherText()
     {
-        //Arrage
+        // Arrange
         var helper = CreateHelper();
         var plainText = "secret note";
 
-        //Act
+        // Act
         var first = helper.Encrypt(plainText);
         var second = helper.Encrypt(plainText);
 
-        //Assert
+        // Assert
         first.Should().NotBe(second);
     }
 

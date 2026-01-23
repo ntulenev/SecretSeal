@@ -21,10 +21,10 @@ public sealed class CreateNoteResponseTests
         };
         options.Converters.Add(new ShortGuidJsonConverter());
 
-        //Act
+        // Act
         var json = JsonSerializer.Serialize(response, options);
 
-        //Assert
+        // Assert
         json.Should().Be($"{{\"id\":\"{new ShortGuid(id)}\"}}");
     }
 }

@@ -8,14 +8,14 @@ public sealed class NoteTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenIdIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         NoteId id = null!;
         var content = "content";
 
-        //Act
+        // Act
         Action act = () => _ = new Note(id, content);
 
-        //Assert
+        // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -23,14 +23,14 @@ public sealed class NoteTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenContentIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var id = new NoteId(Guid.NewGuid());
         string content = null!;
 
-        //Act
+        // Act
         Action act = () => _ = new Note(id, content);
 
-        //Assert
+        // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -38,14 +38,14 @@ public sealed class NoteTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenContentIsWhitespaceThrowsArgumentException()
     {
-        //Arrage
+        // Arrange
         var id = new NoteId(Guid.NewGuid());
         var content = "   ";
 
-        //Act
+        // Act
         Action act = () => _ = new Note(id, content);
 
-        //Assert
+        // Assert
         act.Should()
             .Throw<ArgumentException>();
     }
@@ -54,14 +54,14 @@ public sealed class NoteTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenContentIsEmptyThrowsArgumentException()
     {
-        //Arrage
+        // Arrange
         var id = new NoteId(Guid.NewGuid());
         var content = string.Empty;
 
-        //Act
+        // Act
         Action act = () => _ = new Note(id, content);
 
-        //Assert
+        // Assert
         act.Should()
             .Throw<ArgumentException>();
     }
@@ -70,14 +70,14 @@ public sealed class NoteTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenArgumentsAreValidSetsProperties()
     {
-        //Arrage
+        // Arrange
         var id = new NoteId(Guid.NewGuid());
         var content = "hello";
 
-        //Act
+        // Act
         var note = new Note(id, content);
 
-        //Assert
+        // Assert
         note.Id.Should().Be(id);
         note.Content.Should().Be(content);
     }
@@ -86,13 +86,13 @@ public sealed class NoteTests
     [Trait("Category", "Unit")]
     public void CreateWhenContentIsValidCreatesNote()
     {
-        //Arrage
+        // Arrange
         var content = "hello";
 
-        //Act
+        // Act
         var note = Note.Create(content);
 
-        //Assert
+        // Assert
         note.Id.Should().NotBeNull();
         note.Id.Value.Should().NotBe(Guid.Empty);
         note.Content.Should().Be(content);

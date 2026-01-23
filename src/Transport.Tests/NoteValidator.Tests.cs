@@ -13,13 +13,13 @@ public sealed class NoteValidatorTests
     [Trait("Category", "Unit")]
     public void CtorThrowsWhenOptionsIsNull()
     {
-        //Arrage
+        // Arrange
         IOptions<NoteValidationOptions>? options = null;
 
-        //Act
+        // Act
         var action = () => new NoteValidator(options!);
 
-        //Assert
+        // Assert
         action.Should().Throw<ArgumentNullException>();
     }
 
@@ -27,15 +27,15 @@ public sealed class NoteValidatorTests
     [Trait("Category", "Unit")]
     public void ValidateRejectsEmptyNote()
     {
-        //Arrage
+        // Arrange
         var validator = new NoteValidator(Options.Create(new NoteValidationOptions()));
 
-        //Act
+        // Act
         var nullResult = validator.Validate(null);
         var emptyResult = validator.Validate(string.Empty);
         var whitespaceResult = validator.Validate("   ");
 
-        //Assert
+        // Assert
         nullResult.IsValid.Should().BeFalse();
         nullResult.Error.Should().Be("Note must not be empty.");
         nullResult.NormalizedNote.Should().BeNull();
@@ -53,16 +53,16 @@ public sealed class NoteValidatorTests
     [Trait("Category", "Unit")]
     public void ValidateTrimsAndNormalizesNote()
     {
-        //Arrage
+        // Arrange
         var validator = new NoteValidator(Options.Create(new NoteValidationOptions
         {
             MaxNoteLength = 20
         }));
 
-        //Act
+        // Act
         var result = validator.Validate("  secret note  ");
 
-        //Assert
+        // Assert
         result.IsValid.Should().BeTrue();
         result.Error.Should().BeNull();
         result.NormalizedNote.Should().Be("secret note");
@@ -72,16 +72,16 @@ public sealed class NoteValidatorTests
     [Trait("Category", "Unit")]
     public void ValidateRejectsNoteLongerThanMaxLength()
     {
-        //Arrage
+        // Arrange
         var validator = new NoteValidator(Options.Create(new NoteValidationOptions
         {
             MaxNoteLength = 5
         }));
 
-        //Act
+        // Act
         var result = validator.Validate("123456");
 
-        //Assert
+        // Assert
         result.IsValid.Should().BeFalse();
         result.Error.Should().Be("Note must not be longer than 5 characters.");
         result.NormalizedNote.Should().BeNull();
@@ -91,16 +91,16 @@ public sealed class NoteValidatorTests
     [Trait("Category", "Unit")]
     public void ValidateAllowsNoteWhenNoMaxLength()
     {
-        //Arrage
+        // Arrange
         var validator = new NoteValidator(Options.Create(new NoteValidationOptions
         {
             MaxNoteLength = null
         }));
 
-        //Act
+        // Act
         var result = validator.Validate("1234567890");
 
-        //Assert
+        // Assert
         result.IsValid.Should().BeTrue();
         result.Error.Should().BeNull();
         result.NormalizedNote.Should().Be("1234567890");

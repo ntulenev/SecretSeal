@@ -10,17 +10,17 @@ public sealed class CreateNoteRequestTests
     [Trait("Category", "Unit")]
     public void DeserializeReadsCamelCaseNoteProperty()
     {
-        //Arrage
+        // Arrange
         var json = "{\"note\":\"hello\"}";
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        //Act
+        // Act
         var result = JsonSerializer.Deserialize<CreateNoteRequest>(json, options);
 
-        //Assert
+        // Assert
         result.Should().NotBeNull();
         result!.Note.Should().Be("hello");
     }
@@ -29,17 +29,17 @@ public sealed class CreateNoteRequestTests
     [Trait("Category", "Unit")]
     public void DeserializeReadsNullNoteProperty()
     {
-        //Arrage
+        // Arrange
         var json = "{\"note\":null}";
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        //Act
+        // Act
         var result = JsonSerializer.Deserialize<CreateNoteRequest>(json, options);
 
-        //Assert
+        // Assert
         result.Should().NotBeNull();
         result!.Note.Should().BeNull();
     }

@@ -16,16 +16,16 @@ public sealed class NotesRepositoryTests
     [Trait("Category", "Unit")]
     public async Task AddAsyncWhenNoteIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         using var context = CreateContext();
         var repository = new NotesRepository(context);
         Note note = null!;
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         Func<Task> act = () => repository.AddAsync(note, cancellationToken);
 
-        //Assert
+        // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -33,16 +33,16 @@ public sealed class NotesRepositoryTests
     [Trait("Category", "Unit")]
     public async Task RemoveAsyncWhenNoteIdIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         using var context = CreateContext();
         var repository = new NotesRepository(context);
         NoteId noteId = null!;
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         Func<Task> act = () => repository.ConsumeAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -50,7 +50,7 @@ public sealed class NotesRepositoryTests
     [Trait("Category", "Unit")]
     public async Task CountAsyncReturnsNumberOfNotes()
     {
-        //Arrage
+        // Arrange
         using var context = CreateContext();
         var repository = new NotesRepository(context);
         var cancellationToken = new CancellationToken();
@@ -59,9 +59,10 @@ public sealed class NotesRepositoryTests
         await repository.AddAsync(new Note(new NoteId(Guid.NewGuid()), "two"), cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        //Act
+        // Act
         var count = await repository.CountAsync(cancellationToken);
 
+        // Assert
         count.Should().Be(2);
         count.Should().Be(2);
     }

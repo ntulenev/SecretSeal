@@ -8,13 +8,13 @@ public sealed class NoteIdTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenValueIsEmptyThrowsArgumentException()
     {
-        //Arrage
+        // Arrange
         var value = Guid.Empty;
 
-        //Act
+        // Act
         Action act = () => _ = new NoteId(value);
 
-        //Assert
+        // Assert
         act.Should().Throw<ArgumentException>();
     }
 
@@ -22,13 +22,13 @@ public sealed class NoteIdTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenValueIsNotEmptySetsValue()
     {
-        //Arrage
+        // Arrange
         var value = Guid.NewGuid();
 
-        //Act
+        // Act
         var noteId = new NoteId(value);
 
-        //Assert
+        // Assert
         noteId.Value.Should().Be(value);
     }
 
@@ -36,10 +36,10 @@ public sealed class NoteIdTests
     [Trait("Category", "Unit")]
     public void NewCreatesNoteIdWithNonEmptyValue()
     {
-        //Arrage & Act
+        // Arrange & Act
         var noteId = NoteId.New();
 
-        //Assert
+        // Assert
         noteId.Value.Should().NotBe(Guid.Empty);
     }
 
@@ -47,17 +47,17 @@ public sealed class NoteIdTests
     [Trait("Category", "Unit")]
     public void EqualsAndGetHashCodeUseValueSemantics()
     {
-        //Arrage
+        // Arrange
         var value = Guid.NewGuid();
         var first = new NoteId(value);
         var second = new NoteId(value);
 
-        //Act
+        // Act
         var areEqual = first.Equals(second);
         var firstHash = first.GetHashCode();
         var secondHash = second.GetHashCode();
 
-        //Assert
+        // Assert
         areEqual.Should().BeTrue();
         firstHash.Should().Be(secondHash);
     }

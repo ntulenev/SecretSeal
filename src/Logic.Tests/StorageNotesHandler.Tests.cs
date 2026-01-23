@@ -14,13 +14,13 @@ public sealed class StorageNotesHandlerTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenUnitOfWorkIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         IUnitOfWork unitOfWork = null!;
 
-        //Act
+        // Act
         Action act = () => _ = new StorageNotesHandler(unitOfWork);
 
-        //Assert
+        // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -28,16 +28,16 @@ public sealed class StorageNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task AddNoteAsyncWhenNoteIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict).Object;
         var handler = new StorageNotesHandler(unitOfWork);
         Note note = null!;
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         Func<Task> act = () => handler.AddNoteAsync(note, cancellationToken);
 
-        //Assert
+        // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -45,7 +45,7 @@ public sealed class StorageNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task AddNoteAsyncAddsNoteAndSavesChanges()
     {
-        //Arrage
+        // Arrange
         var note = new Note(new NoteId(Guid.NewGuid()), "content");
         var cancellationToken = new CancellationToken();
         var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
@@ -67,10 +67,10 @@ public sealed class StorageNotesHandlerTests
             .Callback(() => uowCount++)
             .Returns(Task.CompletedTask);
 
-        //Act
+        // Act
         await handler.AddNoteAsync(note, cancellationToken);
 
-        //Assert
+        // Assert
         repoMock.VerifyAll();
         unitOfWorkMock.VerifyAll();
         uowCount.Should().Be(1);
@@ -81,7 +81,7 @@ public sealed class StorageNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task GetNotesCountAsyncReturnsRepositoryCount()
     {
-        //Arrage
+        // Arrange
         const long expected = 3;
         var cancellationToken = new CancellationToken();
         var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
@@ -95,10 +95,10 @@ public sealed class StorageNotesHandlerTests
             .Setup(repo => repo.CountAsync(cancellationToken))
             .ReturnsAsync(expected);
 
-        //Act
+        // Act
         var result = await handler.GetNotesCountAsync(cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().Be(expected);
         repoMock.VerifyAll();
         unitOfWorkMock.VerifyAll();
@@ -108,16 +108,16 @@ public sealed class StorageNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncWhenNoteIdIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict).Object;
         var handler = new StorageNotesHandler(unitOfWork);
         NoteId noteId = null!;
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         Func<Task> act = () => handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -125,7 +125,7 @@ public sealed class StorageNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncReturnsNullWhenNoteDoesNotExist()
     {
-        //Arrage
+        // Arrange
         var noteId = new NoteId(Guid.NewGuid());
         var cancellationToken = new CancellationToken();
         var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
@@ -145,10 +145,10 @@ public sealed class StorageNotesHandlerTests
             .Setup(repo => repo.ConsumeAsync(noteId, cancellationToken))
             .ReturnsAsync((Note?)null);
 
-        //Act
+        // Act
         var result = await handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().BeNull();
         repoMock.VerifyAll();
         unitOfWorkMock.VerifyAll();
@@ -159,7 +159,7 @@ public sealed class StorageNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncRemovesNoteAndSavesChanges()
     {
-        //Arrage
+        // Arrange
         var noteId = new NoteId(Guid.NewGuid());
         var note = new Note(noteId, "content");
         var cancellationToken = new CancellationToken();
@@ -182,10 +182,10 @@ public sealed class StorageNotesHandlerTests
             .Callback(() => uowCount++)
             .Returns(Task.CompletedTask);
 
-        //Act
+        // Act
         var result = await handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().Be(note);
         repoMock.VerifyAll();
         unitOfWorkMock.VerifyAll();
@@ -197,7 +197,7 @@ public sealed class StorageNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncDoesNotRemovesNoteThatJustWasDeleted()
     {
-        //Arrage
+        // Arrange
         var noteId = new NoteId(Guid.NewGuid());
         var note = new Note(noteId, "content");
         var cancellationToken = new CancellationToken();
@@ -220,10 +220,10 @@ public sealed class StorageNotesHandlerTests
             .Callback(() => removeCount++)
             .Returns(Task.FromResult<Note?>(note));
 
-        //Act
+        // Act
         var result = await handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().Be(note);
         repoMock.VerifyAll();
         unitOfWorkMock.VerifyAll();

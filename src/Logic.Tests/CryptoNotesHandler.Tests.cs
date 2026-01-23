@@ -14,14 +14,14 @@ public sealed class CryptoNotesHandlerTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenNotesHandlerIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         INotesHandler notesHandler = null!;
         var cryptoHelper = new Mock<ICryptoHelper>(MockBehavior.Strict).Object;
 
-        //Act
+        // Act
         Action act = () => _ = new CryptoNotesHandler(notesHandler, cryptoHelper);
 
-        //Assert
+        // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -29,14 +29,14 @@ public sealed class CryptoNotesHandlerTests
     [Trait("Category", "Unit")]
     public void ConstructorWhenCryptoHelperIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var notesHandler = new Mock<INotesHandler>(MockBehavior.Strict).Object;
         ICryptoHelper cryptoHelper = null!;
 
-        //Act
+        // Act
         Action act = () => _ = new CryptoNotesHandler(notesHandler, cryptoHelper);
 
-        //Assert
+        // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -44,17 +44,17 @@ public sealed class CryptoNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task AddNoteAsyncWhenNoteIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var notesHandler = new Mock<INotesHandler>(MockBehavior.Strict).Object;
         var cryptoHelper = new Mock<ICryptoHelper>(MockBehavior.Strict).Object;
         var handler = new CryptoNotesHandler(notesHandler, cryptoHelper);
         Note note = null!;
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         Func<Task> act = () => handler.AddNoteAsync(note, cancellationToken);
 
-        //Assert
+        // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -62,7 +62,7 @@ public sealed class CryptoNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task AddNoteAsyncEncryptsContentAndForwardsToInnerHandler()
     {
-        //Arrage
+        // Arrange
         var noteId = new NoteId(Guid.NewGuid());
         var note = new Note(noteId, "plain");
         var encrypted = "encrypted";
@@ -83,10 +83,10 @@ public sealed class CryptoNotesHandlerTests
             .Callback(() => addNoteCalls++)
             .Returns(Task.CompletedTask);
 
-        //Act
+        // Act
         await handler.AddNoteAsync(note, cancellationToken);
 
-        //Assert
+        // Assert
         cryptoHelperMock.VerifyAll();
         notesHandlerMock.VerifyAll();
         encryptCalls.Should().Be(1);
@@ -97,7 +97,7 @@ public sealed class CryptoNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task GetNotesCountAsyncReturnsInnerHandlerCount()
     {
-        //Arrage
+        // Arrange
         const long expected = 12;
         var cancellationToken = new CancellationToken();
         var notesHandlerMock = new Mock<INotesHandler>(MockBehavior.Strict);
@@ -110,10 +110,10 @@ public sealed class CryptoNotesHandlerTests
             .Callback(() => getNotesCountCalls++)
             .ReturnsAsync(expected);
 
-        //Act
+        // Act
         var result = await handler.GetNotesCountAsync(cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().Be(expected);
         notesHandlerMock.VerifyAll();
         getNotesCountCalls.Should().Be(1);
@@ -123,17 +123,17 @@ public sealed class CryptoNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncWhenNoteIdIsNullThrowsArgumentNullException()
     {
-        //Arrage
+        // Arrange
         var notesHandler = new Mock<INotesHandler>(MockBehavior.Strict).Object;
         var cryptoHelper = new Mock<ICryptoHelper>(MockBehavior.Strict).Object;
         var handler = new CryptoNotesHandler(notesHandler, cryptoHelper);
         NoteId noteId = null!;
         var cancellationToken = new CancellationToken();
 
-        //Act
+        // Act
         Func<Task> act = () => handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -141,7 +141,7 @@ public sealed class CryptoNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncReturnsNullWhenInnerHandlerReturnsNull()
     {
-        //Arrage
+        // Arrange
         var noteId = new NoteId(Guid.NewGuid());
         var cancellationToken = new CancellationToken();
         var notesHandlerMock = new Mock<INotesHandler>(MockBehavior.Strict);
@@ -154,10 +154,10 @@ public sealed class CryptoNotesHandlerTests
             .Callback(() => takeNoteCalls++)
             .ReturnsAsync((Note?)null);
 
-        //Act
+        // Act
         var result = await handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().BeNull();
         notesHandlerMock.VerifyAll();
         takeNoteCalls.Should().Be(1);
@@ -167,7 +167,7 @@ public sealed class CryptoNotesHandlerTests
     [Trait("Category", "Unit")]
     public async Task TakeNoteAsyncDecryptsContentAndReturnsNote()
     {
-        //Arrage
+        // Arrange
         var noteId = new NoteId(Guid.NewGuid());
         var encrypted = "encrypted";
         var decrypted = "plain";
@@ -188,10 +188,10 @@ public sealed class CryptoNotesHandlerTests
             .Callback(() => decryptCalls++)
             .Returns(decrypted);
 
-        //Act
+        // Act
         var result = await handler.TakeNoteAsync(noteId, cancellationToken);
 
-        //Assert
+        // Assert
         result.Should().NotBeNull();
         result!.Id.Should().Be(noteId);
         result.Content.Should().Be(decrypted);

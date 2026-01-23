@@ -10,13 +10,13 @@ public sealed class NoteValidationResultTests
     [Trait("Category", "Unit")]
     public void SuccessCreatesValidResult()
     {
-        //Arrage
+        // Arrange
         var note = "normalized";
 
-        //Act
+        // Act
         var result = NoteValidationResult.Success(note);
 
-        //Assert
+        // Assert
         result.IsValid.Should().BeTrue();
         result.Error.Should().BeNull();
         result.NormalizedNote.Should().Be(note);
@@ -26,13 +26,13 @@ public sealed class NoteValidationResultTests
     [Trait("Category", "Unit")]
     public void FailCreatesInvalidResult()
     {
-        //Arrage
+        // Arrange
         var error = "bad note";
 
-        //Act
+        // Act
         var result = NoteValidationResult.Fail(error);
 
-        //Assert
+        // Assert
         result.IsValid.Should().BeFalse();
         result.Error.Should().Be(error);
         result.NormalizedNote.Should().BeNull();
