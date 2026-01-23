@@ -175,12 +175,12 @@
             transition: all 120ms ease;
         }
 
-        .source-link:hover {
-            background: rgba(56, 189, 248, 0.15);
-            border-color: #38bdf8;
-            color: #7dd3fc;
-            transform: translateY(-1px);
-        }
+            .source-link:hover {
+                background: rgba(56, 189, 248, 0.15);
+                border-color: #38bdf8;
+                color: #7dd3fc;
+                transform: translateY(-1px);
+            }
 
         footer {
             margin-top: 40px;
@@ -227,7 +227,9 @@
                 <button class="copy-btn" type="button" onclick="copyFrom('linkBox')">Copy link</button>
             </div>
 
-            <div class="mini">Share the link with a friend. It will ask for confirmation, then read & destroy the secret.</div>
+            <div class="mini">
+                <b>Client-side encryption.</b> The key part (<code>#k=</code>) is not sent to server.
+            </div>
         </div>
 
         <div class="hint">Creates a one-time note and returns a ID you can share.</div>
@@ -242,7 +244,9 @@
         </div>
 
         <div id="readResult" class="result"></div>
-        <div class="hint">This will delete the note immediately after reading (DELETE).</div>
+        <div class="hint">
+            This will delete the note immediately after reading (DELETE).
+        </div>
     </section>
 
     <footer>
@@ -279,7 +283,6 @@
         }
 
         async function copyText(text) {
-            // Prefer Clipboard API, fallback to execCommand
             try {
                 if (navigator.clipboard && window.isSecureContext) {
                     await navigator.clipboard.writeText(text);
@@ -311,10 +314,127 @@
             if (!text) return;
 
             const ok = await copyText(text);
-            // tiny UX feedback
             const old = el.textContent;
             el.textContent = ok ? (old + "  ✅ Copied") : (old + "  ❌ Copy failed");
             setTimeout(() => { el.textContent = old; }, 900);
+        }
+
+        // ===== Crypto helpers (AES-256-GCM, key in URL hash) =====
+
+        function bytesToB64url(bytes) {
+            const bin = String.fromCharCode(...bytes);
+            return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+        }
+
+        function b64urlToBytes(b64url) {
+            const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((b64url.length + 3) % 4);
+            const bin = atob(b64);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return bytes;
+        }
+
+        function utf8ToBytes(s) { return new TextEncoder().encode(s); }
+        function bytesToUtf8(b) { return new TextDecoder().decode(b); }
+
+        function randBytes(n) {
+            const a = new Uint8Array(n);
+            crypto.getRandomValues(a);
+            return a;
+        }
+
+        async function importAesKeyFromB64url(keyB64url) {
+            const raw = b64urlToBytes(keyB64url);
+            if (raw.length !== 32) throw new Error("Note not found (or already consumed).");
+            return crypto.subtle.importKey(
+                "raw",
+                raw,
+                { name: "AES-GCM" },
+                false,
+                ["encrypt", "decrypt"]
+            );
+        }
+
+        async function encryptToPayload(plaintext) {
+            const keyBytes = randBytes(32);
+            const keyB64url = bytesToB64url(keyBytes);
+            const iv = randBytes(12);
+
+            const key = await crypto.subtle.importKey(
+                "raw",
+                keyBytes,
+                { name: "AES-GCM" },
+                false,
+                ["encrypt"]
+            );
+
+            const ct = new Uint8Array(await crypto.subtle.encrypt(
+                { name: "AES-GCM", iv },
+                key,
+                utf8ToBytes(plaintext)
+            ));
+
+            const payload = {
+                v: 1,
+                alg: "A256GCM",
+                iv: bytesToB64url(iv),
+                ct: bytesToB64url(ct)
+            };
+
+            return { payloadString: JSON.stringify(payload), keyB64url };
+        }
+
+        async function decryptFromPayloadString(payloadString, keyB64url) {
+            let payload;
+            try { payload = JSON.parse(payloadString); }
+            catch { throw new Error("Note not found (or already consumed)."); }
+
+            if (!payload || payload.v !== 1 || payload.alg !== "A256GCM" || !payload.iv || !payload.ct) {
+                throw new Error("Note not found (or already consumed).");
+            }
+
+            const iv = b64urlToBytes(payload.iv);
+            const ct = b64urlToBytes(payload.ct);
+            const key = await importAesKeyFromB64url(keyB64url);
+
+            const pt = new Uint8Array(await crypto.subtle.decrypt(
+                { name: "AES-GCM", iv },
+                key,
+                ct
+            ));
+
+            return bytesToUtf8(pt);
+        }
+
+        function parseCompositeId(input) {
+            // Accept:
+            //  - "id"
+            //  - "id#k=KEY"
+            //  - full link ".../read.html?id=ID#k=KEY"
+            const s = (input || "").trim();
+            if (!s) return { id: "", key: "" };
+
+            if (/^https?:\/\//i.test(s)) {
+                try {
+                    const u = new URL(s);
+                    const id = (u.searchParams.get("id") || "").trim();
+                    const hash = (u.hash || "").replace(/^#/, "");
+                    const hp = new URLSearchParams(hash);
+                    const key = (hp.get("k") || "").trim();
+                    return { id, key };
+                } catch {
+                }
+            }
+
+            const parts = s.split("#");
+            if (parts.length === 1) return { id: s, key: "" };
+
+            const id = (parts[0] || "").trim();
+            const hashPart = (parts.slice(1).join("#") || "").trim();
+            const hp = new URLSearchParams(hashPart);
+            const key = (hp.get("k") || "").trim();
+
+            return { id, key };
         }
 
         async function createNote() {
@@ -335,11 +455,17 @@
 
             try {
                 const note = (noteInput.value || "").trim();
+                if (!note) {
+                    setResult(result, "error", "Secret is required");
+                    return;
+                }
+
+                const enc = await encryptToPayload(note);
 
                 const response = await fetch("/notes", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ note })
+                    body: JSON.stringify({ note: enc.payloadString })
                 });
 
                 const data = await readJsonSafe(response);
@@ -348,21 +474,20 @@
                     throw new Error((data && data.error) || "Failed to create note");
                 }
 
-                // Clear input on success
                 noteInput.value = "";
                 noteInput.focus();
 
                 const id = data.id;
-                const link = `${window.location.origin}/read.html?id=${encodeURIComponent(id)}`;
 
-                setResult(result, "success", "Secret created! Share it using ID or link below:");
+                const composite = `${id}#k=${enc.keyB64url}`;
 
-                guidBox.textContent = id;
+                const link = `${window.location.origin}/read.html?id=${encodeURIComponent(id)}#k=${encodeURIComponent(enc.keyB64url)}`;
+
+                setResult(result, "success", "Secret created! Share it using composite ID or link below:");
+
+                guidBox.textContent = composite;
                 linkBox.textContent = link;
                 share.style.display = "block";
-
-                // Optional: auto-copy link (comment out if you don't want it)
-                // await copyText(link);
 
             } catch (err) {
                 setResult(result, "error", err?.message || String(err));
@@ -377,7 +502,10 @@
             const result = document.getElementById("readResult");
 
             setResult(result, null, "");
-            const id = (idInput.value || "").trim();
+            const parsed = parseCompositeId(idInput.value || "");
+
+            const id = (parsed.id || "").trim();
+            const key = (parsed.key || "").trim();
 
             if (!id) {
                 setResult(result, "error", "ID is required");
@@ -387,6 +515,10 @@
             btn.disabled = true;
 
             try {
+                if (!key) {
+                    throw new Error("Note not found (or already consumed).");
+                }
+
                 const response = await fetch(`/notes/${encodeURIComponent(id)}`, {
                     method: "DELETE"
                 });
@@ -394,10 +526,13 @@
                 const data = await readJsonSafe(response);
 
                 if (!response.ok) {
-                    throw new Error((data && data.error) || "Note not found");
+                    throw new Error((data && data.error) || "Note not found (or already consumed).");
                 }
 
-                setResult(result, "success", `Secret:\n\n${data.note}`);
+                const payloadString = data.note;
+                const plaintext = await decryptFromPayloadString(payloadString, key);
+
+                setResult(result, "success", `Secret:\n\n${plaintext}`);
 
             } catch (err) {
                 setResult(result, "error", err?.message || String(err));

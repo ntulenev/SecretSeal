@@ -105,9 +105,9 @@
             cursor: pointer;
         }
 
-        .logo a:hover {
-            text-decoration: underline;
-        }
+            .logo a:hover {
+                text-decoration: underline;
+            }
 
         .source-link {
             font-size: 15px;
@@ -121,12 +121,12 @@
             transition: all 120ms ease;
         }
 
-        .source-link:hover {
-            background: rgba(56, 189, 248, 0.15);
-            border-color: #38bdf8;
-            color: #7dd3fc;
-            transform: translateY(-1px);
-        }
+            .source-link:hover {
+                background: rgba(56, 189, 248, 0.15);
+                border-color: #38bdf8;
+                color: #7dd3fc;
+                transform: translateY(-1px);
+            }
 
         footer {
             margin-top: 40px;
@@ -165,8 +165,7 @@
         <div id="result" class="result"></div>
 
         <div class="hint">
-            This secret can be read only once.
-            After opening, it will be permanently deleted.
+            This secret can be read only once. After opening, it will be permanently deleted.
         </div>
     </section>
 
@@ -196,6 +195,8 @@
         const resultEl = document.getElementById("result");
         const btn = document.getElementById("openBtn");
 
+        const NOT_FOUND_MSG = "Note not found (or already consumed).";
+
         if (!id) {
             btn.disabled = true;
             showError("No secret ID provided in URL.");
@@ -211,6 +212,72 @@
             resultEl.className = "result success";
         }
 
+        function getKeyFromHash() {
+            const h = (window.location.hash || "").replace(/^#/, "");
+            if (!h) return null;
+            const hp = new URLSearchParams(h);
+            return hp.get("k");
+        }
+
+        // ===== Crypto helpers (AES-256-GCM, same payload as index.html) =====
+
+        function b64urlToBytes(b64url) {
+            const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((b64url.length + 3) % 4);
+            const bin = atob(b64);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return bytes;
+        }
+
+        function bytesToUtf8(b) { return new TextDecoder().decode(b); }
+
+        async function importAesKeyFromB64url(keyB64url) {
+            const raw = b64urlToBytes(keyB64url);
+
+            if (raw.length !== 32) {
+                throw new Error(NOT_FOUND_MSG);
+            }
+
+            return crypto.subtle.importKey(
+                "raw",
+                raw,
+                { name: "AES-GCM" },
+                false,
+                ["decrypt"]
+            );
+        }
+
+        async function decryptFromPayloadString(payloadString, keyB64url) {
+            let payload;
+            try { payload = JSON.parse(payloadString); }
+            catch { throw new Error(NOT_FOUND_MSG); }
+
+            if (!payload || payload.v !== 1 || payload.alg !== "A256GCM" || !payload.iv || !payload.ct) {
+                throw new Error(NOT_FOUND_MSG);
+            }
+
+            let iv, ct;
+            try {
+                iv = b64urlToBytes(payload.iv);
+                ct = b64urlToBytes(payload.ct);
+            } catch {
+                throw new Error(NOT_FOUND_MSG);
+            }
+
+            const key = await importAesKeyFromB64url(keyB64url);
+
+            try {
+                const pt = new Uint8Array(await crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv },
+                    key,
+                    ct
+                ));
+                return bytesToUtf8(pt);
+            } catch {
+                throw new Error(NOT_FOUND_MSG);
+            }
+        }
+
         async function openSecret() {
             if (!id) return;
 
@@ -219,6 +286,11 @@
             resultEl.className = "result";
 
             try {
+                const key = (getKeyFromHash() || "").trim();
+                if (!key) {
+                    throw new Error(NOT_FOUND_MSG);
+                }
+
                 const response = await fetch(`/notes/${encodeURIComponent(id)}`, {
                     method: "DELETE"
                 });
@@ -230,16 +302,27 @@
                 catch { data = { error: text }; }
 
                 if (!response.ok) {
-                    throw new Error(data?.error || "Secret not found or already destroyed");
+                    throw new Error(data?.error || NOT_FOUND_MSG);
+                }
+                const payloadString = data?.note;
+
+                if (typeof payloadString !== "string" || !payloadString) {
+                    throw new Error(NOT_FOUND_MSG);
                 }
 
-                showSuccess(`Secret:\n\n${data.note}`);
+                const plaintext = await decryptFromPayloadString(payloadString, key);
+
+                showSuccess(`Secret:\n\n${plaintext}`);
 
             } catch (err) {
-                showError(err.message || String(err));
+                const msg = err?.message || String(err);
+                if (msg === NOT_FOUND_MSG) {
+                    showError(NOT_FOUND_MSG);
+                } else {
+                    showError(msg);
+                }
             }
         }
     </script>
-
 </body>
 </html>
