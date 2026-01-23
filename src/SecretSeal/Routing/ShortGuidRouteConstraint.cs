@@ -16,7 +16,9 @@ namespace SecretSeal.Routing;
 /// It only determines whether the route value can be parsed as a
 /// <see cref="ShortGuid"/>.
 /// </remarks>
-internal sealed class ShortGuidRouteConstraint : IRouteConstraint
+#pragma warning disable CA1515 // Need for tests
+public sealed class ShortGuidRouteConstraint : IRouteConstraint
+#pragma warning restore CA1515 
 {
     /// <summary>
     /// Determines whether the route parameter matches a valid <see cref="ShortGuid"/>.
