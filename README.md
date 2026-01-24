@@ -23,6 +23,21 @@ Before sending, the note is encrypted in the browser using AES-256-GCM (Web Cryp
 Key is generated per note and stored only in the share link’s URL fragment (#k=), so it is never sent to the server. 
 The server stores only the encrypted payload (IV + ciphertext), and decryption happens only on the client when the recipient opens the link
 
+The secret is accessed using the following format:
+
+`<sealId>#k=<secretKey>`
+
+Where:
+
+- `<sealId>` — the note identifier used to locate the encrypted record on the server.
+- `<secretKey>` — the client-side decryption key used to decrypt the content in the browser.
+
+The server only uses `<sealId>` to fetch the encrypted payload.  
+The `<secretKey>` is never sent to the backend and is used exclusively on the client side for decryption.
+
+Example:
+`https://<your-url>/read.html?id=gANSqy_0RkCeSIGN3bKO1w#k=azk6F5OGDFsJjd7GG1Fw4VSEU0U8PYfQzYaSzOjqnpg`
+
 #### Server-side encryption
 In case the service is used as an API, server-side encryption is also supported.
 Notes on a server side are stored **encrypted** using **AES-256**.
