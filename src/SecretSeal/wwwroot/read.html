@@ -4,20 +4,34 @@
     <meta charset="UTF-8" />
     <title>Secret Seal - Read secret</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="icon" href="/favicon.ico">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" href="/favicon.ico" />
+
     <style>
-        *,
-        *::before,
-        *::after {
+        :root {
+            --bg: #0f172a;
+            --panel: #020617;
+            --text: #e5e7eb;
+            --border: #1e293b;
+            --border-2: #334155;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            --r: 14px;
+            --r2: 10px;
+            --sans: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        *, *::before, *::after {
             box-sizing: border-box;
         }
 
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0f172a;
-            color: #e5e7eb;
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
             max-width: 700px;
             margin: 60px auto;
             padding: 0 16px;
@@ -30,11 +44,11 @@
         }
 
         section {
-            background: #020617;
-            border: 1px solid #1e293b;
-            border-radius: 14px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
             padding: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            box-shadow: var(--shadow);
         }
 
         .question {
@@ -46,20 +60,21 @@
             display: flex;
             gap: 12px;
             margin-bottom: 16px;
+            flex-wrap: wrap;
         }
 
         button {
             padding: 12px 18px;
-            background: #38bdf8;
+            background: var(--accent);
             border: none;
-            border-radius: 10px;
+            border-radius: var(--r2);
             cursor: pointer;
             font-weight: 700;
             color: #001018;
         }
 
             button:hover {
-                background: #0ea5e9;
+                background: var(--accent-hover);
             }
 
             button:disabled {
@@ -93,39 +108,13 @@
             margin-top: 10px;
         }
 
-        footer {
-            text-align: center;
-            opacity: 0.6;
-            margin-top: 34px;
-        }
-
         .logo a {
             color: inherit;
             text-decoration: none;
-            cursor: pointer;
         }
 
             .logo a:hover {
                 text-decoration: underline;
-            }
-
-        .source-link {
-            font-size: 15px;
-            font-weight: 700;
-            color: #38bdf8;
-            text-decoration: none;
-            padding: 6px 14px;
-            border-radius: 999px;
-            border: 1px solid #334155;
-            background: rgba(2, 6, 23, 0.4);
-            transition: all 120ms ease;
-        }
-
-            .source-link:hover {
-                background: rgba(56, 189, 248, 0.15);
-                border-color: #38bdf8;
-                color: #7dd3fc;
-                transform: translateY(-1px);
             }
 
         footer {
@@ -145,8 +134,28 @@
             opacity: 0.7;
             font-size: 14px;
         }
+
+        .source-link {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent);
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border-2);
+            background: rgba(2, 6, 23, 0.4);
+            transition: all 120ms ease;
+        }
+
+            .source-link:hover {
+                background: rgba(56, 189, 248, 0.15);
+                border-color: var(--accent);
+                color: #7dd3fc;
+                transform: translateY(-1px);
+            }
     </style>
 </head>
+
 <body>
 
     <h1 class="logo">
@@ -154,12 +163,10 @@
     </h1>
 
     <section>
-        <div class="question">
-            🔥 Open this secret?
-        </div>
+        <div class="question">🔥 Open this secret?</div>
 
         <div class="actions">
-            <button id="openBtn" onclick="openSecret()">Open & Destroy</button>
+            <button id="openBtn" type="button">Open & Destroy</button>
         </div>
 
         <div id="result" class="result"></div>
@@ -171,9 +178,7 @@
 
     <footer>
         <div class="footer-inner">
-            <div class="footer-text">
-                SecretSeal 🦭 — read once, vanish forever
-            </div>
+            <div class="footer-text">SecretSeal 🦭 — read once, vanish forever</div>
 
             <a class="source-link"
                href="https://github.com/ntulenev/SecretSeal"
@@ -182,45 +187,81 @@
                 ⚙️ Project source on GitHub
             </a>
 
-            <small>
-                Personal pet project for private use · Not intended for public use
-            </small>
+            <small>Personal pet project for private use · Not intended for public use</small>
         </div>
     </footer>
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get("id");
+    <script type="module">
+        // =============================
+        // Constants / DOM
+        // =============================
+        const NOT_FOUND = "Note not found (or already consumed).";
 
-        const resultEl = document.getElementById("result");
-        const btn = document.getElementById("openBtn");
+        const openBtn = mustGet("openBtn");
+        const resultEl = mustGet("result");
 
-        const NOT_FOUND_MSG = "Note not found (or already consumed).";
-
-        if (!id) {
-            btn.disabled = true;
-            showError("No secret ID provided in URL.");
+        function mustGet(id) {
+            const el = document.getElementById(id);
+            if (!el) throw new Error(`Missing element #${id}`);
+            return el;
         }
 
-        function showError(text) {
-            resultEl.textContent = text;
-            resultEl.className = "result error";
-        }
-
-        function showSuccess(text) {
-            resultEl.textContent = text;
-            resultEl.className = "result success";
-        }
+        // =============================
+        // URL / key
+        // =============================
+        const id = (() => {
+            const v = (new URLSearchParams(window.location.search).get("id") || "").trim();
+            return v || null;
+        })();
 
         function getKeyFromHash() {
-            const h = (window.location.hash || "").replace(/^#/, "");
-            if (!h) return null;
-            const hp = new URLSearchParams(h);
-            return hp.get("k");
+            const raw = (window.location.hash || "").replace(/^#/, "").trim();
+            if (!raw) return null;
+            const hp = new URLSearchParams(raw);
+            const k = (hp.get("k") || "").trim();
+            return k || null;
         }
 
-        // ===== Crypto helpers (AES-256-GCM, same payload as index.html) =====
+        // =============================
+        // UI helpers
+        // =============================
+        function setResult(kind, text) {
+            resultEl.textContent = text || "";
+            resultEl.className = "result";
+            if (kind) resultEl.classList.add(kind);
+        }
 
+        function disableForever(btn) {
+            btn.disabled = true;
+            btn.setAttribute("aria-busy", "true");
+            btn.dataset.used = "1";
+        }
+
+        // =============================
+        // Fetch helpers
+        // =============================
+        async function readJsonSafe(response) {
+            const text = await response.text();
+            if (!text) return null;
+            try { return JSON.parse(text); }
+            catch { return { error: text }; }
+        }
+
+        async function apiConsumeNote(noteId) {
+            const res = await fetch(`/notes/${encodeURIComponent(noteId)}`, { method: "DELETE" });
+            const data = await readJsonSafe(res);
+
+            if (!res.ok) {
+                const msg = (data && data.error) ? String(data.error) : NOT_FOUND;
+                throw new Error(msg || NOT_FOUND);
+            }
+
+            return data;
+        }
+
+        // =============================
+        // Crypto helpers (AES-256-GCM)
+        // =============================
         function b64urlToBytes(b64url) {
             const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((b64url.length + 3) % 4);
             const bin = atob(b64);
@@ -229,31 +270,19 @@
             return bytes;
         }
 
-        function bytesToUtf8(b) { return new TextDecoder().decode(b); }
-
         async function importAesKeyFromB64url(keyB64url) {
             const raw = b64urlToBytes(keyB64url);
-
-            if (raw.length !== 32) {
-                throw new Error(NOT_FOUND_MSG);
-            }
-
-            return crypto.subtle.importKey(
-                "raw",
-                raw,
-                { name: "AES-GCM" },
-                false,
-                ["decrypt"]
-            );
+            if (raw.length !== 32) throw new Error(NOT_FOUND);
+            return crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, ["decrypt"]);
         }
 
         async function decryptFromPayloadString(payloadString, keyB64url) {
             let payload;
             try { payload = JSON.parse(payloadString); }
-            catch { throw new Error(NOT_FOUND_MSG); }
+            catch { throw new Error(NOT_FOUND); }
 
             if (!payload || payload.v !== 1 || payload.alg !== "A256GCM" || !payload.iv || !payload.ct) {
-                throw new Error(NOT_FOUND_MSG);
+                throw new Error(NOT_FOUND);
             }
 
             let iv, ct;
@@ -261,68 +290,70 @@
                 iv = b64urlToBytes(payload.iv);
                 ct = b64urlToBytes(payload.ct);
             } catch {
-                throw new Error(NOT_FOUND_MSG);
+                throw new Error(NOT_FOUND);
             }
 
             const key = await importAesKeyFromB64url(keyB64url);
 
             try {
-                const pt = new Uint8Array(await crypto.subtle.decrypt(
-                    { name: "AES-GCM", iv },
-                    key,
-                    ct
-                ));
-                return bytesToUtf8(pt);
+                const pt = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct));
+                return new TextDecoder().decode(pt);
             } catch {
-                throw new Error(NOT_FOUND_MSG);
+                throw new Error(NOT_FOUND);
             }
         }
 
-        async function openSecret() {
-            if (!id) return;
+        // =============================
+        // One-shot action (hard-guarded)
+        // =============================
+        let inFlight = false;
 
-            btn.disabled = true;
-            resultEl.textContent = "";
-            resultEl.className = "result";
+        async function openSecretOnce() {
+            // HARD GUARD (covers double-click, keyboard, re-entrancy)
+            if (inFlight || openBtn.dataset.used === "1" || openBtn.disabled) return;
+            inFlight = true;
+
+            // Disable immediately and remove handler to make it truly one-shot
+            disableForever(openBtn);
+            openBtn.removeEventListener("click", openSecretOnce);
+
+            setResult(null, "");
 
             try {
-                const key = (getKeyFromHash() || "").trim();
-                if (!key) {
-                    throw new Error(NOT_FOUND_MSG);
-                }
+                if (!id) throw new Error("No secret ID provided in URL.");
 
-                const response = await fetch(`/notes/${encodeURIComponent(id)}`, {
-                    method: "DELETE"
-                });
+                const key = getKeyFromHash();
+                if (!key) throw new Error(NOT_FOUND);
 
-                const text = await response.text();
-                let data = null;
+                const data = await apiConsumeNote(id);
 
-                try { data = text ? JSON.parse(text) : null; }
-                catch { data = { error: text }; }
-
-                if (!response.ok) {
-                    throw new Error(data?.error || NOT_FOUND_MSG);
-                }
-                const payloadString = data?.note;
-
-                if (typeof payloadString !== "string" || !payloadString) {
-                    throw new Error(NOT_FOUND_MSG);
-                }
+                const payloadString = typeof data?.note === "string" ? data.note : "";
+                if (!payloadString) throw new Error(NOT_FOUND);
 
                 const plaintext = await decryptFromPayloadString(payloadString, key);
-
-                showSuccess(`Secret:\n\n${plaintext}`);
-
+                setResult("success", `Secret:\n\n${plaintext}`);
             } catch (err) {
-                const msg = err?.message || String(err);
-                if (msg === NOT_FOUND_MSG) {
-                    showError(NOT_FOUND_MSG);
-                } else {
-                    showError(msg);
-                }
+                setResult("error", err?.message || NOT_FOUND);
+                // keep disabled forever (old behavior you want)
             }
         }
+
+        // =============================
+        // Init
+        // =============================
+        if (!id) {
+            disableForever(openBtn);
+            setResult("error", "No secret ID provided in URL.");
+        } else {
+            openBtn.addEventListener("click", openSecretOnce, { passive: true });
+
+            // Optional: Enter triggers open once as well
+            window.addEventListener("keydown", (e) => {
+                if (e.key !== "Enter") return;
+                openSecretOnce();
+            });
+        }
     </script>
+
 </body>
 </html>
