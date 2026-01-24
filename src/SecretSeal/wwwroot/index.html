@@ -3,22 +3,35 @@
 <head>
     <meta charset="UTF-8" />
     <title>Secret Seal</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
-        *,
-        *::before,
-        *::after {
+        :root {
+            --bg: #0f172a;
+            --panel: #020617;
+            --text: #e5e7eb;
+            --border: #1e293b;
+            --border-2: #334155;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            --r: 12px;
+            --r2: 10px;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --sans: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        *, *::before, *::after {
             box-sizing: border-box;
         }
 
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0f172a;
-            color: #e5e7eb;
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
             max-width: 800px;
             margin: 40px auto;
             padding: 0 16px;
@@ -32,12 +45,12 @@
         }
 
         section {
-            background: #020617;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
             padding: 20px;
             margin-bottom: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            box-shadow: var(--shadow);
         }
 
         h2 {
@@ -47,17 +60,17 @@
 
         textarea, input {
             width: 100%;
-            background: #020617;
-            color: #e5e7eb;
-            border: 1px solid #334155;
-            border-radius: 10px;
+            background: var(--panel);
+            color: var(--text);
+            border: 1px solid var(--border-2);
+            border-radius: var(--r2);
             padding: 12px 12px;
             margin-top: 8px;
             outline: none;
         }
 
             textarea:focus, input:focus {
-                border-color: #38bdf8;
+                border-color: var(--accent);
                 box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
             }
 
@@ -76,16 +89,16 @@
 
         button {
             padding: 10px 16px;
-            background: #38bdf8;
+            background: var(--accent);
             border: none;
-            border-radius: 10px;
+            border-radius: var(--r2);
             cursor: pointer;
             font-weight: 700;
             color: #001018;
         }
 
             button:hover {
-                background: #0ea5e9;
+                background: var(--accent-hover);
             }
 
             button:disabled {
@@ -96,9 +109,10 @@
         .result {
             margin-top: 12px;
             padding: 12px;
-            border-radius: 10px;
+            border-radius: var(--r2);
             white-space: pre-wrap;
             line-height: 1.35;
+            min-height: 1px;
         }
 
         .success {
@@ -119,13 +133,6 @@
             margin-top: 8px;
         }
 
-        footer {
-            text-align: center;
-            opacity: 0.65;
-            margin-top: 34px;
-            padding-bottom: 10px;
-        }
-
         .row {
             display: flex;
             gap: 10px;
@@ -138,19 +145,19 @@
             flex: 1 1 420px;
             min-width: 260px;
             padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid #334155;
-            background: #020617;
-            color: #e5e7eb;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            border-radius: var(--r2);
+            border: 1px solid var(--border-2);
+            background: var(--panel);
+            color: var(--text);
+            font-family: var(--mono);
             overflow-x: auto;
             white-space: nowrap;
         }
 
         .copy-btn {
             background: #1f2937;
-            color: #e5e7eb;
-            border: 1px solid #334155;
+            color: var(--text);
+            border: 1px solid var(--border-2);
         }
 
             .copy-btn:hover {
@@ -162,25 +169,6 @@
             font-size: 13px;
             margin-top: 8px;
         }
-
-        .source-link {
-            font-size: 15px;
-            font-weight: 700;
-            color: #38bdf8;
-            text-decoration: none;
-            padding: 6px 14px;
-            border-radius: 999px;
-            border: 1px solid #334155;
-            background: rgba(2, 6, 23, 0.4);
-            transition: all 120ms ease;
-        }
-
-            .source-link:hover {
-                background: rgba(56, 189, 248, 0.15);
-                border-color: #38bdf8;
-                color: #7dd3fc;
-                transform: translateY(-1px);
-            }
 
         footer {
             margin-top: 40px;
@@ -199,10 +187,29 @@
             opacity: 0.7;
             font-size: 14px;
         }
+
+        .source-link {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent);
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border-2);
+            background: rgba(2, 6, 23, 0.4);
+            transition: all 120ms ease;
+        }
+
+            .source-link:hover {
+                background: rgba(56, 189, 248, 0.15);
+                border-color: var(--accent);
+                color: #7dd3fc;
+                transform: translateY(-1px);
+            }
     </style>
 </head>
-<body>
 
+<body>
     <h1>🦭 SecretSeal</h1>
 
     <section>
@@ -211,7 +218,7 @@
         <textarea id="createNote" rows="5" placeholder="Enter your secret..."></textarea>
 
         <div class="actions">
-            <button id="createBtn" type="button" onclick="createNote()">Create</button>
+            <button id="createBtn" type="button">Create</button>
         </div>
 
         <div id="createResult" class="result"></div>
@@ -219,12 +226,12 @@
         <div id="createShare" style="display:none;">
             <div class="row">
                 <div class="pill" id="guidBox"></div>
-                <button class="copy-btn" type="button" onclick="copyFrom('guidBox')">Copy ID</button>
+                <button class="copy-btn" id="copyIdBtn" type="button">Copy ID</button>
             </div>
 
             <div class="row">
                 <div class="pill" id="linkBox"></div>
-                <button class="copy-btn" type="button" onclick="copyFrom('linkBox')">Copy link</button>
+                <button class="copy-btn" id="copyLinkBtn" type="button">Copy link</button>
             </div>
 
             <div class="mini">
@@ -240,20 +247,16 @@
 
         <input id="readId" placeholder="Enter secret ID" />
         <div class="actions">
-            <button id="readBtn" type="button" onclick="readNote()">Read & Destroy</button>
+            <button id="readBtn" type="button">Read & Destroy</button>
         </div>
 
         <div id="readResult" class="result"></div>
-        <div class="hint">
-            This will delete the note immediately after reading (DELETE).
-        </div>
+        <div class="hint">This will delete the note immediately after reading (DELETE).</div>
     </section>
 
     <footer>
         <div class="footer-inner">
-            <div class="footer-text">
-                SecretSeal 🦭 — read once, vanish forever
-            </div>
+            <div class="footer-text">SecretSeal 🦭 — read once, vanish forever</div>
 
             <a class="source-link"
                href="https://github.com/ntulenev/SecretSeal"
@@ -262,19 +265,73 @@
                 ⚙️ Project source on GitHub
             </a>
 
-            <small>
-                Personal pet project for private use · Not intended for public use
-            </small>
+            <small>Personal pet project for private use · Not intended for public use</small>
         </div>
     </footer>
 
-    <script>
+    <script type="module">
+        // =============================
+        // Constants
+        // =============================
+        const NOT_FOUND = "Note not found (or already consumed).";
+        const API = {
+            create: "/notes",
+            consume: (id) => `/notes/${encodeURIComponent(id)}`
+        };
+
+        // =============================
+        // DOM
+        // =============================
+        const els = {
+            createNote: byId("createNote"),
+            createBtn: byId("createBtn"),
+            createResult: byId("createResult"),
+            createShare: byId("createShare"),
+            guidBox: byId("guidBox"),
+            linkBox: byId("linkBox"),
+            copyIdBtn: byId("copyIdBtn"),
+            copyLinkBtn: byId("copyLinkBtn"),
+
+            readId: byId("readId"),
+            readBtn: byId("readBtn"),
+            readResult: byId("readResult"),
+        };
+
+        function byId(id) {
+            const el = document.getElementById(id);
+            if (!el) throw new Error(`Missing element #${id}`);
+            return el;
+        }
+
+        // =============================
+        // UI helpers
+        // =============================
         function setResult(el, kind, text) {
             el.textContent = text || "";
             el.className = "result";
             if (kind) el.classList.add(kind);
         }
 
+        function setBusy(btn, isBusy) {
+            btn.disabled = isBusy;
+            btn.setAttribute("aria-busy", String(isBusy));
+        }
+
+        function showShare({ compositeId, link }) {
+            els.guidBox.textContent = compositeId;
+            els.linkBox.textContent = link;
+            els.createShare.style.display = "block";
+        }
+
+        function hideShare() {
+            els.createShare.style.display = "none";
+            els.guidBox.textContent = "";
+            els.linkBox.textContent = "";
+        }
+
+        // =============================
+        // Fetch helpers
+        // =============================
         async function readJsonSafe(response) {
             const text = await response.text();
             if (!text) return null;
@@ -282,6 +339,21 @@
             catch { return { error: text }; }
         }
 
+        async function apiJson(url, options) {
+            const res = await fetch(url, options);
+            const data = await readJsonSafe(res);
+
+            if (!res.ok) {
+                const msg = (data && data.error) ? String(data.error) : "Request failed";
+                throw new Error(msg);
+            }
+
+            return data;
+        }
+
+        // =============================
+        // Clipboard helpers
+        // =============================
         async function copyText(text) {
             try {
                 if (navigator.clipboard && window.isSecureContext) {
@@ -290,6 +362,7 @@
                 }
             } catch { /* ignore */ }
 
+            // Fallback for older browsers / non-secure contexts
             const ta = document.createElement("textarea");
             ta.value = text;
             ta.style.position = "fixed";
@@ -308,19 +381,21 @@
             }
         }
 
-        async function copyFrom(elementId) {
-            const el = document.getElementById(elementId);
-            const text = (el?.textContent || "").trim();
+        async function copyFrom(el) {
+            const text = (el.textContent || "").trim();
             if (!text) return;
 
             const ok = await copyText(text);
+
+            // small, non-invasive feedback
             const old = el.textContent;
             el.textContent = ok ? (old + "  ✅ Copied") : (old + "  ❌ Copy failed");
             setTimeout(() => { el.textContent = old; }, 900);
         }
 
-        // ===== Crypto helpers (AES-256-GCM, key in URL hash) =====
-
+        // =============================
+        // Crypto helpers (AES-256-GCM, key in URL hash)
+        // =============================
         function bytesToB64url(bytes) {
             const bin = String.fromCharCode(...bytes);
             return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
@@ -334,8 +409,10 @@
             return bytes;
         }
 
-        function utf8ToBytes(s) { return new TextEncoder().encode(s); }
-        function bytesToUtf8(b) { return new TextDecoder().decode(b); }
+        const utf8 = {
+            toBytes: (s) => new TextEncoder().encode(s),
+            fromBytes: (b) => new TextDecoder().decode(b),
+        };
 
         function randBytes(n) {
             const a = new Uint8Array(n);
@@ -345,67 +422,53 @@
 
         async function importAesKeyFromB64url(keyB64url) {
             const raw = b64urlToBytes(keyB64url);
-            if (raw.length !== 32) throw new Error("Note not found (or already consumed).");
-            return crypto.subtle.importKey(
-                "raw",
-                raw,
-                { name: "AES-GCM" },
-                false,
-                ["encrypt", "decrypt"]
-            );
+            if (raw.length !== 32) throw new Error(NOT_FOUND);
+            return crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
         }
 
         async function encryptToPayload(plaintext) {
             const keyBytes = randBytes(32);
-            const keyB64url = bytesToB64url(keyBytes);
             const iv = randBytes(12);
 
-            const key = await crypto.subtle.importKey(
-                "raw",
-                keyBytes,
-                { name: "AES-GCM" },
-                false,
-                ["encrypt"]
-            );
+            const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]);
 
-            const ct = new Uint8Array(await crypto.subtle.encrypt(
-                { name: "AES-GCM", iv },
-                key,
-                utf8ToBytes(plaintext)
-            ));
+            const ct = new Uint8Array(
+                await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, utf8.toBytes(plaintext))
+            );
 
             const payload = {
                 v: 1,
                 alg: "A256GCM",
                 iv: bytesToB64url(iv),
-                ct: bytesToB64url(ct)
+                ct: bytesToB64url(ct),
             };
 
-            return { payloadString: JSON.stringify(payload), keyB64url };
+            return {
+                payloadString: JSON.stringify(payload),
+                keyB64url: bytesToB64url(keyBytes),
+            };
         }
 
         async function decryptFromPayloadString(payloadString, keyB64url) {
             let payload;
             try { payload = JSON.parse(payloadString); }
-            catch { throw new Error("Note not found (or already consumed)."); }
+            catch { throw new Error(NOT_FOUND); }
 
             if (!payload || payload.v !== 1 || payload.alg !== "A256GCM" || !payload.iv || !payload.ct) {
-                throw new Error("Note not found (or already consumed).");
+                throw new Error(NOT_FOUND);
             }
 
             const iv = b64urlToBytes(payload.iv);
             const ct = b64urlToBytes(payload.ct);
             const key = await importAesKeyFromB64url(keyB64url);
 
-            const pt = new Uint8Array(await crypto.subtle.decrypt(
-                { name: "AES-GCM", iv },
-                key,
-                ct
-            ));
-
-            return bytesToUtf8(pt);
+            const pt = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct));
+            return utf8.fromBytes(pt);
         }
 
+        // =============================
+        // ID parsing / link building
+        // =============================
         function parseCompositeId(input) {
             // Accept:
             //  - "id"
@@ -418,129 +481,119 @@
                 try {
                     const u = new URL(s);
                     const id = (u.searchParams.get("id") || "").trim();
-                    const hash = (u.hash || "").replace(/^#/, "");
-                    const hp = new URLSearchParams(hash);
+                    const hp = new URLSearchParams((u.hash || "").replace(/^#/, ""));
                     const key = (hp.get("k") || "").trim();
                     return { id, key };
-                } catch {
-                }
+                } catch { /* fall through */ }
             }
 
-            const parts = s.split("#");
-            if (parts.length === 1) return { id: s, key: "" };
+            const [idPart, ...hashParts] = s.split("#");
+            const id = (idPart || "").trim();
+            if (!hashParts.length) return { id, key: "" };
 
-            const id = (parts[0] || "").trim();
-            const hashPart = (parts.slice(1).join("#") || "").trim();
-            const hp = new URLSearchParams(hashPart);
+            const hp = new URLSearchParams(hashParts.join("#"));
             const key = (hp.get("k") || "").trim();
-
             return { id, key };
         }
 
+        function buildReadLink(id, key) {
+            const url = new URL("/read.html", window.location.origin);
+            url.searchParams.set("id", id);
+            url.hash = `k=${encodeURIComponent(key)}`;
+            return url.toString();
+        }
+
+        // =============================
+        // Actions
+        // =============================
         async function createNote() {
-            const noteInput = document.getElementById("createNote");
-            const btn = document.getElementById("createBtn");
-            const result = document.getElementById("createResult");
+            setResult(els.createResult, null, "");
+            hideShare();
 
-            const share = document.getElementById("createShare");
-            const guidBox = document.getElementById("guidBox");
-            const linkBox = document.getElementById("linkBox");
+            const note = (els.createNote.value || "").trim();
+            if (!note) {
+                setResult(els.createResult, "error", "Secret is required");
+                return;
+            }
 
-            setResult(result, null, "");
-            share.style.display = "none";
-            guidBox.textContent = "";
-            linkBox.textContent = "";
-
-            btn.disabled = true;
+            setBusy(els.createBtn, true);
 
             try {
-                const note = (noteInput.value || "").trim();
-                if (!note) {
-                    setResult(result, "error", "Secret is required");
-                    return;
-                }
-
                 const enc = await encryptToPayload(note);
 
-                const response = await fetch("/notes", {
+                const data = await apiJson(API.create, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ note: enc.payloadString })
+                    body: JSON.stringify({ note: enc.payloadString }),
                 });
 
-                const data = await readJsonSafe(response);
+                const id = String(data.id || "").trim();
+                if (!id) throw new Error("Failed to create note");
 
-                if (!response.ok) {
-                    throw new Error((data && data.error) || "Failed to create note");
-                }
+                els.createNote.value = "";
+                els.createNote.focus();
 
-                noteInput.value = "";
-                noteInput.focus();
+                const compositeId = `${id}#k=${enc.keyB64url}`;
+                const link = buildReadLink(id, enc.keyB64url);
 
-                const id = data.id;
-
-                const composite = `${id}#k=${enc.keyB64url}`;
-
-                const link = `${window.location.origin}/read.html?id=${encodeURIComponent(id)}#k=${encodeURIComponent(enc.keyB64url)}`;
-
-                setResult(result, "success", "Secret created! Share it using composite ID or link below:");
-
-                guidBox.textContent = composite;
-                linkBox.textContent = link;
-                share.style.display = "block";
+                setResult(els.createResult, "success", "Secret created! Share it using composite ID or link below:");
+                showShare({ compositeId, link });
 
             } catch (err) {
-                setResult(result, "error", err?.message || String(err));
+                setResult(els.createResult, "error", err?.message || String(err));
             } finally {
-                btn.disabled = false;
+                setBusy(els.createBtn, false);
             }
         }
 
         async function readNote() {
-            const idInput = document.getElementById("readId");
-            const btn = document.getElementById("readBtn");
-            const result = document.getElementById("readResult");
+            setResult(els.readResult, null, "");
 
-            setResult(result, null, "");
-            const parsed = parseCompositeId(idInput.value || "");
-
-            const id = (parsed.id || "").trim();
-            const key = (parsed.key || "").trim();
-
+            const { id, key } = parseCompositeId(els.readId.value);
             if (!id) {
-                setResult(result, "error", "ID is required");
+                setResult(els.readResult, "error", "ID is required");
                 return;
             }
 
-            btn.disabled = true;
+            setBusy(els.readBtn, true);
 
             try {
-                if (!key) {
-                    throw new Error("Note not found (or already consumed).");
-                }
+                if (!key) throw new Error(NOT_FOUND);
 
-                const response = await fetch(`/notes/${encodeURIComponent(id)}`, {
-                    method: "DELETE"
-                });
+                // DELETE returns encrypted payload, then we decrypt locally
+                const data = await apiJson(API.consume(id), { method: "DELETE" });
 
-                const data = await readJsonSafe(response);
+                const payloadString = String(data.note || "");
+                if (!payloadString) throw new Error(NOT_FOUND);
 
-                if (!response.ok) {
-                    throw new Error((data && data.error) || "Note not found (or already consumed).");
-                }
-
-                const payloadString = data.note;
                 const plaintext = await decryptFromPayloadString(payloadString, key);
-
-                setResult(result, "success", `Secret:\n\n${plaintext}`);
+                setResult(els.readResult, "success", `Secret:\n\n${plaintext}`);
 
             } catch (err) {
-                setResult(result, "error", err?.message || String(err));
+                // Normalize “not found” and crypto errors to the same message
+                const msg = err?.message || String(err);
+                setResult(els.readResult, "error", msg.includes("AES") ? NOT_FOUND : msg);
             } finally {
-                btn.disabled = false;
+                setBusy(els.readBtn, false);
             }
         }
-    </script>
 
+        // =============================
+        // Wire up events (no inline JS)
+        // =============================
+        els.createBtn.addEventListener("click", createNote);
+        els.readBtn.addEventListener("click", readNote);
+
+        els.copyIdBtn.addEventListener("click", () => copyFrom(els.guidBox));
+        els.copyLinkBtn.addEventListener("click", () => copyFrom(els.linkBox));
+
+        // Nice-to-have: Ctrl/Cmd+Enter submits
+        els.createNote.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") createNote();
+        });
+        els.readId.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") readNote();
+        });
+    </script>
 </body>
 </html>
