@@ -1,0 +1,73 @@
+:root {
+    --content-width: 800px;
+    --body-margin-top: 40px;
+    --h1-size: 40px;
+    --h1-margin: 0 0 24px;
+    --section-padding: 20px;
+    --section-radius: 12px;
+}
+
+h2 {
+    margin: 0 0 14px;
+    font-size: 28px;
+}
+
+textarea,
+input {
+    width: 100%;
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r2);
+    padding: 12px 12px;
+    margin-top: 8px;
+    outline: none;
+}
+
+textarea:focus,
+input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 130px;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.pill {
+    flex: 1 1 420px;
+    min-width: 260px;
+    padding: 10px 12px;
+    border-radius: var(--r2);
+    border: 1px solid var(--border-2);
+    background: var(--panel);
+    color: var(--text);
+    font-family: var(--mono);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.copy-btn {
+    background: #1f2937;
+    color: var(--text);
+    border: 1px solid var(--border-2);
+}
+
+.copy-btn:hover {
+    background: #111827;
+}
+
+.mini {
+    opacity: 0.8;
+    font-size: 13px;
+    margin-top: 8px;
+}
