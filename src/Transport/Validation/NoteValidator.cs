@@ -40,7 +40,7 @@ public sealed class NoteValidator : INoteValidator
         if (max is not null && normalized.Length > max.Value)
         {
             return NoteValidationResult.Fail(
-                $"Note must not be longer than {max.Value} characters.");
+                $"This note is too large.");
         }
 #pragma warning restore IDE0046 // Convert to conditional expression
 

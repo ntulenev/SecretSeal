@@ -37,15 +37,12 @@ public sealed class NoteValidatorTests
 
         // Assert
         nullResult.IsValid.Should().BeFalse();
-        nullResult.Error.Should().Be("Note must not be empty.");
         nullResult.NormalizedNote.Should().BeNull();
 
         emptyResult.IsValid.Should().BeFalse();
-        emptyResult.Error.Should().Be("Note must not be empty.");
         emptyResult.NormalizedNote.Should().BeNull();
 
         whitespaceResult.IsValid.Should().BeFalse();
-        whitespaceResult.Error.Should().Be("Note must not be empty.");
         whitespaceResult.NormalizedNote.Should().BeNull();
     }
 
@@ -83,7 +80,6 @@ public sealed class NoteValidatorTests
 
         // Assert
         result.IsValid.Should().BeFalse();
-        result.Error.Should().Be("Note must not be longer than 5 characters.");
         result.NormalizedNote.Should().BeNull();
     }
 

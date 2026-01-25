@@ -62,7 +62,7 @@ public sealed class SecretSealApiTests
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        payload.GetProperty("error").GetString().Should().Be("Note must not be longer than 15 characters.");
+        payload.GetProperty("error").GetString().Should().Be("This note is too large.");
     }
 
     [Fact(DisplayName = "POST /notes returns id and DELETE /notes/{id} returns note content")]
