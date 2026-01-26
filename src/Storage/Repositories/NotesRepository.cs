@@ -71,5 +71,11 @@ public sealed class NotesRepository : IRepository<Note, NoteId>
     public Task<long> CountAsync(CancellationToken cancellationToken) =>
         _dbContext.Notes.LongCountAsync(cancellationToken);
 
+    /// <inheritdoc />
+    public Task<int> RemoveObsoleteNotesAsync(DateTimeOffset olderThan, CancellationToken cancellationToken) =>
+        _dbContext.Notes
+            .Where(note => note.CreationDate < olderThan)
+            .ExecuteDeleteAsync(cancellationToken);
+
     private readonly SecretSealDbContext _dbContext;
 }

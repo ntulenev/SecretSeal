@@ -28,4 +28,12 @@ public interface IRepository<TEntity, TKey>
     /// <param name="cancellationToken">A token that can be used to cancel the asynchronous operation.</param>
     /// <returns>The number of entities.</returns>
     Task<long> CountAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Removes all notes older than the specified timestamp.
+    /// </summary>
+    /// <param name="olderThan">The cutoff timestamp; notes older than this value are removed.</param>
+    /// <param name="cancellationToken">A token that can be used to cancel the asynchronous operation.</param>
+    /// <returns>The number of notes removed.</returns>
+    Task<int> RemoveObsoleteNotesAsync(DateTimeOffset olderThan, CancellationToken cancellationToken);
 }
