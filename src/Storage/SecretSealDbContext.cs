@@ -36,6 +36,8 @@ public sealed class SecretSealDbContext : DbContext
                 .IsRequired();
             _ = entity.Property(note => note.CreationDate)
                 .IsRequired();
+            _ = entity.HasIndex(note => note.CreationDate)
+                .HasDatabaseName("IX_Notes_CreationDate");
         });
     }
 }
