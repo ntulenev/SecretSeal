@@ -6,6 +6,7 @@ using Cryptography;
 using Cryptography.Configuration;
 
 using Logic;
+using Logic.Configuration;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ using Models;
 
 using SecretSeal.Configuration;
 using SecretSeal.Routing;
+using SecretSeal.Services;
 
 using Storage;
 using Storage.Repositories;
@@ -82,6 +84,13 @@ internal static class StartupHelpers
             .Bind(builder.Configuration.GetSection("Crypto"))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        _ = builder.Services
+            .AddOptions<NotesCleanerOptions>()
+            .Bind(builder.Configuration.GetSection("NotesCleaner"))
+            .ValidateDataAnnotations()
+            .Validate(o => o.CleanupInterval > TimeSpan.Zero, "NotesCleaner:CleanupInterval must be greater than zero.")
+            .ValidateOnStart();
     }
 
     private static void RegisterServices(WebApplicationBuilder builder)
@@ -103,6 +112,9 @@ internal static class StartupHelpers
 
             case StorageMode.Database:
                 _ = builder.Services.AddScoped<INotesHandler, CryptoNotesHandler>();
+                _ = builder.Services.AddScoped<INotesCleaner, NotesCleaner>();
+                _ = builder.Services.AddSingleton<INotesCleaningHandler, NotesCleaningHandler>();
+                _ = builder.Services.AddHostedService<NotesCleanerService>();
 
                 var cs = builder.Configuration.GetConnectionString("SecretSealDb");
                 if (string.IsNullOrWhiteSpace(cs))
