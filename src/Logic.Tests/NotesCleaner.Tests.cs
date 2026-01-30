@@ -20,7 +20,7 @@ public sealed class NotesCleanerTests
     {
         // Arrange
         IUnitOfWork unitOfWork = null!;
-        var options = Options.Create(new NotesCleanerOptions { DaysToKeep = 1 });
+        var options = Options.Create(new NotesCleanerOptions { DaysToKeep = 1, CleanupInterval = TimeSpan.FromDays(1) });
 
         // Act
         Action act = () => _ = new NotesCleaner(unitOfWork, options);
@@ -67,7 +67,7 @@ public sealed class NotesCleanerTests
         // Arrange
         const int daysToKeep = 7;
         var cancellationToken = new CancellationToken();
-        var options = Options.Create(new NotesCleanerOptions { DaysToKeep = daysToKeep });
+        var options = Options.Create(new NotesCleanerOptions { DaysToKeep = daysToKeep, CleanupInterval = TimeSpan.FromDays(1) });
         var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var cleaner = new NotesCleaner(unitOfWorkMock.Object, options);
