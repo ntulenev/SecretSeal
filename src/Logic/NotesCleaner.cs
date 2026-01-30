@@ -23,7 +23,7 @@ public sealed class NotesCleaner : INotesCleaner
 
         if (options.Value is null)
         {
-            throw new ArgumentException(nameof(options.Value));
+            throw new ArgumentException("Notes cleaner options are not configured.", nameof(options));
         }
 
         _unitOfWork = unitOfWork;
