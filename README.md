@@ -63,7 +63,7 @@ Notes on a server side are stored **encrypted** using **AES-256**.
     "SecretSealDb": "Server=localhost\\SQLEXPRESS;..."
   },
   "Crypto": {
-    "Key": "32-byte-secret-key"
+    "Key": "32-byte-secret-key" // Example: rQw8xFJ8242pY0xJqYG5xNn4R1h1s97Z
   },
 ```
 
