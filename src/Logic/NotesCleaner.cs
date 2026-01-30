@@ -21,10 +21,13 @@ public sealed class NotesCleaner : INotesCleaner
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(options);
 
-        var optionsValue = options.Value ?? throw new ArgumentNullException(nameof(options));
+        if (options.Value is null)
+        {
+            throw new ArgumentException(nameof(options.Value));
+        }
 
         _unitOfWork = unitOfWork;
-        _options = optionsValue;
+        _options = options.Value;
     }
 
     /// <inheritdoc />
