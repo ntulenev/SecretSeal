@@ -55,6 +55,10 @@ Notes on a server side are stored **encrypted** using **AES-256**.
   "Validation": {
     "MaxNoteLength": 4000 // Optional content length limitation
   },
+  "NotesCleaner": {
+    "DaysToKeep": 30, // Retention window (days)
+    "CleanupInterval": "01:00:00" // Run cleanup every hour (hh:mm:ss)
+  },
   "ConnectionStrings": {
     "SecretSealDb": "Server=localhost\\SQLEXPRESS;..."
   },
@@ -82,3 +86,12 @@ Returns basic runtime statistics.
 | notesCount | Total number of stored notes |
 | encryptionEnabled | Indicates whether notes are stored in the system in encrypted or plain text form |
 | isInMemory | Indicates whether the application is currently using in-memory storage instead of a database |
+
+### Notes cleanup
+
+When storage mode is set to Database, the application runs a background cleanup job.
+It removes notes older than the configured retention window and repeats on a schedule.
+
+Configuration:
+- `NotesCleaner:DaysToKeep` is the retention window in days.
+- `NotesCleaner:CleanupInterval` is the interval between cleanup runs (TimeSpan format).
