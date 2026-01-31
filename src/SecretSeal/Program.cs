@@ -1,6 +1,7 @@
 using Abstractions;
 
 using Logic;
+using Logic.Configuration;
 
 using Microsoft.Extensions.Options;
 
@@ -56,6 +57,15 @@ app.MapGet("/stat", async (INotesHandler handler, CancellationToken token, IOpti
     return Results.Ok(new StatResponse(count, encryptionEnabled, isInMemory));
 })
 .CacheOutput("stat-1m");
+
+app.MapGet("/retention-policy", (IOptions<NotesCleanerOptions> options, IOptions<StorageOptions> storageMode) =>
+{
+    var daysToKeep = storageMode.Value.Mode == StorageMode.InMemory
+        ? -1
+        : options.Value.DaysToKeep;
+    return Results.Ok(new { daysToKeep });
+})
+.CacheOutput("retention-24h");
 
 await StartupHelpers.RunAppAsync(app).ConfigureAwait(false);
 
