@@ -100,7 +100,7 @@ If the application runs in InMemory mode, the endpoint returns `-1`.
 }
 ```
 
-### Notes cleanup
+### 🧹Notes cleanup
 
 When storage mode is set to Database, the application runs a background cleanup job.
 It removes notes older than the configured retention window and repeats on a schedule.
