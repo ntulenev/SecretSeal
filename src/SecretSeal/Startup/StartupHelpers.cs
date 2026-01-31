@@ -139,7 +139,11 @@ internal static class StartupHelpers
     private static void ConfigureCache(WebApplicationBuilder builder)
     {
         _ = builder.Services.AddOutputCache(options =>
-            options.AddPolicy("stat-1m", p => p.Expire(TimeSpan.FromMinutes(1))));
+            options
+                .AddPolicy("stat-1m", p => p.Expire(TimeSpan.FromMinutes(1))));
+        _ = builder.Services.AddOutputCache(options =>
+            options
+                .AddPolicy("retention-24h", p => p.Expire(TimeSpan.FromHours(24))));
     }
 
     private static async Task EnsureDatabaseCreatedIfNeededAsync(WebApplication app)
