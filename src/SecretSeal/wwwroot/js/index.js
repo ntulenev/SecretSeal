@@ -17,6 +17,7 @@ import {
 const API = {
     create: "/notes",
     consume: (id) => `/notes/${encodeURIComponent(id)}`,
+    retention: "/retention-policy",
 };
 
 // =============================
@@ -31,6 +32,7 @@ const els = {
     linkBox: mustGet("linkBox"),
     copyIdBtn: mustGet("copyIdBtn"),
     copyLinkBtn: mustGet("copyLinkBtn"),
+    retentionNote: mustGet("retentionNote"),
 
     readId: mustGet("readId"),
     readBtn: mustGet("readBtn"),
@@ -50,6 +52,8 @@ function hideShare() {
     els.createShare.style.display = "none";
     els.guidBox.textContent = "";
     els.linkBox.textContent = "";
+    els.retentionNote.style.display = "none";
+    els.retentionNote.textContent = "";
 }
 
 // =============================
@@ -65,6 +69,13 @@ async function apiJson(url, options) {
     }
 
     return data;
+}
+
+let retentionPolicyCache = null;
+async function getRetentionPolicy() {
+    if (retentionPolicyCache) return retentionPolicyCache;
+    retentionPolicyCache = apiJson(API.retention, { cache: "no-store" });
+    return retentionPolicyCache;
 }
 
 // =============================
@@ -228,6 +239,21 @@ async function createNote() {
 
         setResult(els.createResult, "success", "Secret created! Share it using composite ID or link below:");
         showShare({ compositeId, link });
+
+        try {
+            const policy = await getRetentionPolicy();
+            const daysToKeep = Number(policy?.daysToKeep);
+            if (Number.isFinite(daysToKeep) && daysToKeep !== -1) {
+                els.retentionNote.textContent = `Your secret note will be automatically deleted after ${daysToKeep} day(s).`;
+                els.retentionNote.style.display = "block";
+            } else {
+                els.retentionNote.style.display = "none";
+                els.retentionNote.textContent = "";
+            }
+        } catch {
+            els.retentionNote.style.display = "none";
+            els.retentionNote.textContent = "";
+        }
     } catch (err) {
         setResult(els.createResult, "error", err?.message || String(err));
     } finally {
@@ -281,4 +307,8 @@ els.createNote.addEventListener("keydown", (e) => {
 });
 els.readId.addEventListener("keydown", (e) => {
     if (e.key === "Enter") readNote();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+     getRetentionPolicy().catch(() => { /* ignore */ });
 });
