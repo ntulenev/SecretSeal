@@ -87,6 +87,19 @@ Returns basic runtime statistics.
 | encryptionEnabled | Indicates whether notes are stored in the system in encrypted or plain text form |
 | isInMemory | Indicates whether the application is currently using in-memory storage instead of a database |
 
+### Retention policy
+
+**GET `/retention-policy`**
+
+Returns the configured retention window in days.
+If the application runs in InMemory mode, the endpoint returns `-1`.
+
+```json
+{
+  "daysToKeep": 30
+}
+```
+
 ### Notes cleanup
 
 When storage mode is set to Database, the application runs a background cleanup job.
