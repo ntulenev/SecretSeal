@@ -37,5 +37,6 @@ button {
 }
 
 .logo a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    color: #cbd5e1;
 }
