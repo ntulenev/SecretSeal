@@ -116,6 +116,75 @@ public sealed class CryptoHelperTests
         decrypted.Should().Be(plainText);
     }
 
+    [Fact(DisplayName = "Encrypt/Decrypt works with Base64 key")]
+    [Trait("Category", "Unit")]
+    public void EncryptDecryptWithBase64Key()
+    {
+        // Arrange
+        var base64Key = Convert.ToBase64String(CreateKeyBytes());
+        var options = Options.Create(new CryptoOptions { Key = base64Key });
+        var helper = new CryptoHelper(options);
+        var plainText = "secret note";
+
+        // Act
+        var cipherText = helper.Encrypt(plainText);
+        var decrypted = helper.Decrypt(cipherText);
+
+        // Assert
+        decrypted.Should().Be(plainText);
+    }
+
+    [Fact(DisplayName = "Encrypt/Decrypt works with Base64url key without padding")]
+    [Trait("Category", "Unit")]
+    public void EncryptDecryptWithBase64UrlKeyWithoutPadding()
+    {
+        // Arrange
+        var base64 = Convert.ToBase64String(CreateKeyBytes());
+        var base64Url = base64.TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        var options = Options.Create(new CryptoOptions { Key = base64Url });
+        var helper = new CryptoHelper(options);
+        var plainText = "secret note";
+
+        // Act
+        var cipherText = helper.Encrypt(plainText);
+        var decrypted = helper.Decrypt(cipherText);
+
+        // Assert
+        decrypted.Should().Be(plainText);
+    }
+
+    [Fact(DisplayName = "Encrypt throws when Base64 key decodes to wrong length")]
+    [Trait("Category", "Unit")]
+    public void EncryptWhenBase64KeyDecodesToWrongLengthThrowsInvalidOperationException()
+    {
+        // Arrange
+        var wrongLengthBytes = new byte[16];
+        var base64Key = Convert.ToBase64String(wrongLengthBytes);
+        var options = Options.Create(new CryptoOptions { Key = base64Key });
+        var helper = new CryptoHelper(options);
+
+        // Act
+        Action act = () => _ = helper.Encrypt("data");
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact(DisplayName = "Encrypt throws when Base64 key is malformed")]
+    [Trait("Category", "Unit")]
+    public void EncryptWhenBase64KeyIsMalformedThrowsInvalidOperationException()
+    {
+        // Arrange
+        var options = Options.Create(new CryptoOptions { Key = "not-base64**" });
+        var helper = new CryptoHelper(options);
+
+        // Act
+        Action act = () => _ = helper.Encrypt("data");
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>();
+    }
+
     [Fact(DisplayName = "Encrypt produces different outputs for the same input")]
     [Trait("Category", "Unit")]
     public void EncryptSameInputProducesDifferentCipherText()
@@ -140,5 +209,16 @@ public sealed class CryptoHelperTests
         });
 
         return new CryptoHelper(options);
+    }
+
+    private static byte[] CreateKeyBytes()
+    {
+        var bytes = new byte[32];
+        for (var i = 0; i < bytes.Length; i++)
+        {
+            bytes[i] = (byte)(i + 1);
+        }
+
+        return bytes;
     }
 }
