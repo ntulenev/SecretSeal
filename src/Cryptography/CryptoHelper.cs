@@ -114,13 +114,47 @@ public class CryptoHelper : ICryptoHelper
             throw new InvalidOperationException("Crypto:Key is not configured.");
         }
 
-        var keyBytes = Encoding.UTF8.GetBytes(options.Key);
+        var keyString = options.Key.Trim();
+        var keyBytes = Encoding.UTF8.GetBytes(keyString);
+        if (keyBytes.Length == KEY_SIZE_BYTES)
+        {
+            return keyBytes;
+        }
 
-        return keyBytes.Length != KEY_SIZE_BYTES
-            ? throw new InvalidOperationException(
-                $"Crypto:Key must be exactly {KEY_SIZE_BYTES} bytes for AES-256. " +
-                $"Current: {keyBytes.Length} bytes.")
-            : keyBytes;
+        try
+        {
+            var normalized = NormalizeBase64(keyString);
+            var decoded = Convert.FromBase64String(normalized);
+            if (decoded.Length == KEY_SIZE_BYTES)
+            {
+                return decoded;
+            }
+
+            throw new InvalidOperationException(
+                $"Crypto:Key must be exactly {KEY_SIZE_BYTES} bytes (raw UTF-8) or Base64 that decodes to {KEY_SIZE_BYTES} bytes. " +
+                $"Current decoded length: {decoded.Length} bytes.");
+        }
+        catch (FormatException)
+        {
+            // fall through to the error below
+        }
+
+        throw new InvalidOperationException(
+            $"Crypto:Key must be exactly {KEY_SIZE_BYTES} bytes (raw UTF-8) or Base64 that decodes to {KEY_SIZE_BYTES} bytes. " +
+            $"Current: {keyBytes.Length} bytes.");
+    }
+
+    private static string NormalizeBase64(string input)
+    {
+        var s = input.Replace('-', '+').Replace('_', '/');
+        var mod = s.Length % 4;
+        return mod switch
+        {
+            0 => s,
+            2 => s + "==",
+            3 => s + "=",
+            _ => throw new FormatException("Invalid Base64 length.")
+        };
     }
 
 
