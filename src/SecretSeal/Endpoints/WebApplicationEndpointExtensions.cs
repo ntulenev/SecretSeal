@@ -4,8 +4,16 @@ using Transport;
 
 namespace SecretSeal.Endpoints;
 
+/// <summary>
+/// Provides endpoint mapping extensions for the SecretSeal web application.
+/// </summary>
 internal static class WebApplicationEndpointExtensions
 {
+    /// <summary>
+    /// Maps the SecretSeal HTTP endpoints to the application.
+    /// </summary>
+    /// <param name="app">The web application to configure.</param>
+    /// <returns>The same <see cref="WebApplication"/> instance for chaining.</returns>
     public static WebApplication MapSecretSealEndpoints(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);
