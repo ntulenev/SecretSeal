@@ -10,10 +10,19 @@ namespace Storage.Tests;
 
 public sealed class NotesRepositoryTests
 {
-    //!!!
-    //ConsumeAsync Tests limited due to InMemory provider limitations with FromSqlRaw
-    //RemoveObsoleteNotesAsync removes notes older than cutoff also not testable
-    //due to InMemory provider limitations with ExecuteDelete
+    [Fact(DisplayName = "Constructor throws when db context is null")]
+    [Trait("Category", "Unit")]
+    public void ConstructorWhenDbContextIsNullThrowsArgumentNullException()
+    {
+        // Arrange
+        SecretSealDbContext dbContext = null!;
+
+        // Act
+        Action act = () => _ = new NotesRepository(dbContext);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
 
     [Fact(DisplayName = "AddAsync throws when note is null")]
     [Trait("Category", "Unit")]
