@@ -19,8 +19,17 @@ using Transport.Validation;
 
 namespace SecretSeal.Startup;
 
+/// <summary>
+/// Provides service registration extensions for note-related application services.
+/// </summary>
 internal static class ServiceCollectionNotesServicesExtensions
 {
+    /// <summary>
+    /// Registers note-related services, use cases, and storage implementation for the configured mode.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> instance for chaining.</returns>
     public static IServiceCollection AddSecretSealApplicationServices(
         this IServiceCollection services,
         IConfiguration configuration)
