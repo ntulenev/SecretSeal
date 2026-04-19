@@ -95,4 +95,27 @@ public sealed class NotesCleaningHandlerTests
         cleanupCalls.Should().Be(1);
         executorMock.VerifyAll();
     }
+
+    [Fact(DisplayName = "RunAsync stops before first execution when token is already cancelled")]
+    [Trait("Category", "Unit")]
+    public async Task RunAsyncWhenTokenIsAlreadyCancelledDoesNotExecuteCleanup()
+    {
+        // Arrange
+        var options = Options.Create(new NotesCleanerOptions
+        {
+            DaysToKeep = 1,
+            CleanupInterval = TimeSpan.FromMilliseconds(1)
+        });
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+        var executorMock = new Mock<INotesCleaningExecutor>(MockBehavior.Strict);
+        var handler = new NotesCleaningHandler(executorMock.Object, options);
+
+        // Act
+        Func<Task> act = () => handler.RunAsync(cts.Token);
+
+        // Assert
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        executorMock.VerifyNoOtherCalls();
+    }
 }
