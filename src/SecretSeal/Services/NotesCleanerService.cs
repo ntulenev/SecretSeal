@@ -2,10 +2,10 @@ using Abstractions;
 
 namespace SecretSeal.Services;
 
+#pragma warning disable CA1515 // Type used in tests
 /// <summary>
 /// Runs the notes cleaner on application startup.
 /// </summary>
-#pragma warning disable CA1515 // Type used in tests
 public sealed class NotesCleanerService : BackgroundService
 #pragma warning restore CA1515 
 {
