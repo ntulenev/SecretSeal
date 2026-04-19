@@ -98,6 +98,35 @@ public sealed class NoteTests
         note.Content.Should().Be(content);
     }
 
+    [Fact(DisplayName = "Create throws when content is null")]
+    [Trait("Category", "Unit")]
+    public void CreateWhenContentIsNullThrowsArgumentNullException()
+    {
+        // Arrange
+        string content = null!;
+
+        // Act
+        Action act = () => _ = Note.Create(content);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Theory(DisplayName = "Create throws when content is empty or whitespace")]
+    [Trait("Category", "Unit")]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("   ")]
+    [InlineData("\t")]
+    public void CreateWhenContentIsInvalidThrowsArgumentException(string content)
+    {
+        // Act
+        Action act = () => _ = Note.Create(content);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
+    }
+
     [Fact(DisplayName = "WithContent keeps id and changes content")]
     [Trait("Category", "Unit")]
     public void WithContentWhenContentIsValidCreatesCopyWithSameId()
@@ -111,6 +140,39 @@ public sealed class NoteTests
         // Assert
         updated.Id.Should().Be(note.Id);
         updated.Content.Should().Be("updated");
+    }
+
+    [Fact(DisplayName = "WithContent throws when content is null")]
+    [Trait("Category", "Unit")]
+    public void WithContentWhenContentIsNullThrowsArgumentNullException()
+    {
+        // Arrange
+        var note = new Note(new NoteId(Guid.NewGuid()), "hello");
+        string content = null!;
+
+        // Act
+        Action act = () => _ = note.WithContent(content);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Theory(DisplayName = "WithContent throws when content is empty or whitespace")]
+    [Trait("Category", "Unit")]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("   ")]
+    [InlineData("\t")]
+    public void WithContentWhenContentIsInvalidThrowsArgumentException(string content)
+    {
+        // Arrange
+        var note = new Note(new NoteId(Guid.NewGuid()), "hello");
+
+        // Act
+        Action act = () => _ = note.WithContent(content);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact(DisplayName = "Restore rehydrates a note from persisted values")]
@@ -127,5 +189,48 @@ public sealed class NoteTests
         // Assert
         note.Id.Value.Should().Be(id);
         note.Content.Should().Be(content);
+    }
+
+    [Fact(DisplayName = "Restore throws when id is empty")]
+    [Trait("Category", "Unit")]
+    public void RestoreWhenIdIsEmptyThrowsArgumentException()
+    {
+        // Arrange
+        var id = Guid.Empty;
+
+        // Act
+        Action act = () => _ = Note.Restore(id, "persisted");
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact(DisplayName = "Restore throws when content is null")]
+    [Trait("Category", "Unit")]
+    public void RestoreWhenContentIsNullThrowsArgumentNullException()
+    {
+        // Arrange
+        string content = null!;
+
+        // Act
+        Action act = () => _ = Note.Restore(Guid.NewGuid(), content);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Theory(DisplayName = "Restore throws when content is empty or whitespace")]
+    [Trait("Category", "Unit")]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("   ")]
+    [InlineData("\t")]
+    public void RestoreWhenContentIsInvalidThrowsArgumentException(string content)
+    {
+        // Act
+        Action act = () => _ = Note.Restore(Guid.NewGuid(), content);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
     }
 }
