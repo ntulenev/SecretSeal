@@ -8,8 +8,17 @@ using Transport.Configuration;
 
 namespace SecretSeal.Startup;
 
+/// <summary>
+/// Provides service registration extensions for application options.
+/// </summary>
 internal static class ServiceCollectionOptionsExtensions
 {
+    /// <summary>
+    /// Registers and validates strongly typed application options.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> instance for chaining.</returns>
     public static IServiceCollection AddSecretSealOptions(
         this IServiceCollection services,
         IConfiguration configuration)
