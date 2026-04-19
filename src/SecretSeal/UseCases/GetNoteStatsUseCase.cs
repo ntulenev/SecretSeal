@@ -10,8 +10,16 @@ using Transport;
 
 namespace SecretSeal.UseCases;
 
+/// <summary>
+/// Returns note storage statistics for the API.
+/// </summary>
 internal sealed class GetNoteStatsUseCase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetNoteStatsUseCase"/> class.
+    /// </summary>
+    /// <param name="handler">The note handler used to read note statistics.</param>
+    /// <param name="storageOptions">The configured storage options.</param>
     public GetNoteStatsUseCase(INotesHandler handler, IOptions<StorageOptions> storageOptions)
     {
         ArgumentNullException.ThrowIfNull(handler);
@@ -20,6 +28,11 @@ internal sealed class GetNoteStatsUseCase
         _storageOptions = storageOptions;
     }
 
+    /// <summary>
+    /// Returns the current API statistics for note storage.
+    /// </summary>
+    /// <param name="cancellationToken">A token that can be used to cancel the asynchronous operation.</param>
+    /// <returns>The current note statistics.</returns>
     public async Task<StatResponse> ExecuteAsync(CancellationToken cancellationToken)
     {
         var count = await _handler.GetNotesCountAsync(cancellationToken).ConfigureAwait(false);
