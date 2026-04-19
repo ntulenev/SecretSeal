@@ -57,6 +57,20 @@ public sealed class NoteIdTests
         noteId.Value.Should().Be(value);
     }
 
+    [Fact(DisplayName = "From throws when value is empty")]
+    [Trait("Category", "Unit")]
+    public void FromWhenValueIsEmptyThrowsArgumentException()
+    {
+        // Arrange
+        var value = Guid.Empty;
+
+        // Act
+        Action act = () => _ = NoteId.From(value);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
+    }
+
     [Fact(DisplayName = "Equals and GetHashCode use value semantics")]
     [Trait("Category", "Unit")]
     public void EqualsAndGetHashCodeUseValueSemantics()
