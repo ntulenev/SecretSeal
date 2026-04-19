@@ -1,28 +1,3 @@
-using System.Diagnostics;
-
-using Abstractions;
-
-using Cryptography;
-using Cryptography.Configuration;
-
-using Logic;
-using Logic.Configuration;
-
-using Microsoft.EntityFrameworkCore;
-
-using Models;
-
-using SecretSeal.Configuration;
-using SecretSeal.Routing;
-using SecretSeal.Services;
-
-using Storage;
-using Storage.Repositories;
-
-using Transport.Configuration;
-using Transport.Serialization;
-using Transport.Validation;
-
 namespace SecretSeal.Startup;
 
 /// <summary>
@@ -39,10 +14,10 @@ internal static class StartupHelpers
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        ConfigureOptions(builder);
-        RegisterRouting(builder);
-        RegisterServices(builder);
-        ConfigureCache(builder);
+        _ = builder.Services.AddSecretSealOptions(builder.Configuration);
+        _ = builder.Services.AddSecretSealRouting();
+        _ = builder.Services.AddSecretSealApplicationServices(builder.Configuration);
+        _ = builder.Services.AddSecretSealCaching();
 
         return builder.Build();
     }
@@ -54,110 +29,7 @@ internal static class StartupHelpers
     /// <returns>A task that represents the asynchronous run operation.</returns>
     public static async Task RunAppAsync(WebApplication app)
     {
-        await EnsureDatabaseCreatedIfNeededAsync(app).ConfigureAwait(false);
+        await app.EnsureStorageCreatedIfNeededAsync().ConfigureAwait(false);
         await app.RunAsync().ConfigureAwait(false);
-    }
-
-    private static void RegisterRouting(WebApplicationBuilder builder)
-    {
-        _ = builder.Services.Configure<RouteOptions>(o => o.ConstraintMap["ShortGuid"] = typeof(ShortGuidRouteConstraint));
-        _ = builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new ShortGuidJsonConverter()));
-    }
-
-    private static void ConfigureOptions(WebApplicationBuilder builder)
-    {
-        _ = builder.Services
-            .AddOptions<StorageOptions>()
-            .Bind(builder.Configuration.GetSection("Storage"))
-            .ValidateOnStart();
-
-        _ = builder.Services
-            .AddOptions<NoteValidationOptions>()
-            .Bind(builder.Configuration.GetSection("Validation"))
-            .Validate(
-                o => o.MaxNoteLength is null or > 0,
-                "Validation:MaxNoteLength must be a positive integer.")
-            .ValidateOnStart();
-
-        _ = builder.Services
-            .AddOptions<CryptoOptions>()
-            .Bind(builder.Configuration.GetSection("Crypto"))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        _ = builder.Services
-            .AddOptions<NotesCleanerOptions>()
-            .Bind(builder.Configuration.GetSection("NotesCleaner"))
-            .ValidateDataAnnotations()
-            .Validate(o => o.CleanupInterval > TimeSpan.Zero, "NotesCleaner:CleanupInterval must be greater than zero.")
-            .ValidateOnStart();
-    }
-
-    private static void RegisterServices(WebApplicationBuilder builder)
-    {
-        _ = builder.Services.AddSingleton<ICryptoHelper, CryptoHelper>();
-        _ = builder.Services.AddSingleton<INoteValidator, NoteValidator>();
-
-        var storageOption = builder.Configuration
-            .GetSection("Storage")
-            .Get<StorageOptions>()
-            ?? throw new InvalidOperationException("Storage options are not configured.");
-
-        switch (storageOption.Mode)
-        {
-            case StorageMode.InMemory:
-                _ = builder.Services.AddSingleton<INotesHandler, CryptoNotesHandler>();
-                _ = builder.Services.AddSingleton<INotesHandler, InMemoryNotesHandler>();
-                break;
-
-            case StorageMode.Database:
-                _ = builder.Services.AddScoped<INotesHandler, CryptoNotesHandler>();
-                _ = builder.Services.AddScoped<INotesCleaner, NotesCleaner>();
-                _ = builder.Services.AddSingleton<INotesCleaningHandler, NotesCleaningHandler>();
-                _ = builder.Services.AddHostedService<NotesCleanerService>();
-
-                var cs = builder.Configuration.GetConnectionString("SecretSealDb");
-                if (string.IsNullOrWhiteSpace(cs))
-                {
-                    throw new InvalidOperationException("ConnectionStrings:SecretSealDb is not configured");
-                }
-
-                _ = builder.Services.AddDbContext<SecretSealDbContext>(o => o.UseSqlServer(cs));
-                _ = builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-                _ = builder.Services.AddScoped<IRepository<Note, NoteId>, NotesRepository>();
-                _ = builder.Services.AddScoped<INotesHandler, StorageNotesHandler>();
-                break;
-
-            default:
-                throw new UnreachableException(
-                    $"Unreachable case for storage {storageOption.Mode} mode");
-        }
-
-        _ = builder.Services.Decorate<INotesHandler, CryptoNotesHandler>();
-    }
-
-    private static void ConfigureCache(WebApplicationBuilder builder)
-    {
-        _ = builder.Services.AddOutputCache(options =>
-            options
-                .AddPolicy("stat-1m", p => p.Expire(TimeSpan.FromMinutes(1))));
-        _ = builder.Services.AddOutputCache(options =>
-            options
-                .AddPolicy("retention-24h", p => p.Expire(TimeSpan.FromHours(24))));
-    }
-
-    private static async Task EnsureDatabaseCreatedIfNeededAsync(WebApplication app)
-    {
-        var storageOption = app.Configuration
-            .GetSection("Storage")
-            .Get<StorageOptions>()
-            ?? throw new InvalidOperationException("Storage options are not configured.");
-
-        if (storageOption.Mode == StorageMode.Database)
-        {
-            using var scope = app.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<SecretSealDbContext>();
-            _ = await db.Database.EnsureCreatedAsync().ConfigureAwait(false);
-        }
     }
 }

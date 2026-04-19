@@ -13,11 +13,13 @@ public sealed class EfUnitOfWork : IUnitOfWork
     /// Initializes a new instance of the EfUnitOfWork class.
     /// </summary>
     /// <param name="dbContext">The database context used for persistence.</param>
-    public EfUnitOfWork(SecretSealDbContext dbContext)
+    /// <param name="notesRepository">The repository that manages note aggregates.</param>
+    public EfUnitOfWork(SecretSealDbContext dbContext, IRepository<Note, NoteId> notesRepository)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(notesRepository);
         _dbContext = dbContext;
-        Notes = new NotesRepository(_dbContext);
+        Notes = notesRepository;
     }
 
     /// <inheritdoc />
