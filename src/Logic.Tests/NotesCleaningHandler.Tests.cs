@@ -118,4 +118,42 @@ public sealed class NotesCleaningHandlerTests
         await act.Should().ThrowAsync<OperationCanceledException>();
         executorMock.VerifyNoOtherCalls();
     }
+
+    [Fact(DisplayName = "RunAsync cancels during delay after cleanup pass completes")]
+    [Trait("Category", "Unit")]
+    public async Task RunAsyncWhenTokenIsCancelledDuringDelayThrowsOperationCanceledException()
+    {
+        // Arrange
+        var options = Options.Create(new NotesCleanerOptions
+        {
+            DaysToKeep = 1,
+            CleanupInterval = TimeSpan.FromSeconds(30)
+        });
+        using var cts = new CancellationTokenSource();
+        var cleanupCompleted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var cleanupCalls = 0;
+
+        var executorMock = new Mock<INotesCleaningExecutor>(MockBehavior.Strict);
+        executorMock
+            .Setup(executor => executor.ExecuteOnceAsync(cts.Token))
+            .Callback(() =>
+            {
+                cleanupCalls++;
+                cleanupCompleted.TrySetResult(true);
+            })
+            .Returns(Task.CompletedTask);
+
+        var handler = new NotesCleaningHandler(executorMock.Object, options);
+
+        // Act
+        var runTask = handler.RunAsync(cts.Token);
+        await cleanupCompleted.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        await cts.CancelAsync();
+        Func<Task> act = async () => await runTask;
+
+        // Assert
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        cleanupCalls.Should().Be(1);
+        executorMock.VerifyAll();
+    }
 }
