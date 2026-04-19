@@ -1,8 +1,14 @@
+using Abstractions;
+
 using FluentAssertions;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+using Logic;
 
 using System.Net;
 using System.Net.Http.Json;
@@ -145,6 +151,15 @@ public sealed class SecretSealApiTests
                 };
 
                 config.AddInMemoryCollection(settings);
+            });
+
+            builder.ConfigureServices(services =>
+            {
+                services.RemoveAll<INotesHandler>();
+                _ = services.AddSingleton<INotesHandler>(serviceProvider =>
+                    new CryptoNotesHandler(
+                        new InMemoryNotesHandler(),
+                        serviceProvider.GetRequiredService<ICryptoHelper>()));
             });
         }
     }

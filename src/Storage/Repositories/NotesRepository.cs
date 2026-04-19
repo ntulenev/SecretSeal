@@ -11,7 +11,7 @@ namespace Storage.Repositories;
 /// <summary>
 /// Provides repository operations for notes using EF Core.
 /// </summary>
-public sealed class NotesRepository : IRepository<Note, NoteId>
+public sealed class NotesRepository : INoteRepository
 {
     /// <summary>
     /// Initializes a new instance of the NotesRepository class.
@@ -24,11 +24,11 @@ public sealed class NotesRepository : IRepository<Note, NoteId>
     }
 
     /// <inheritdoc />
-    public Task AddAsync(Note entity, CancellationToken cancellationToken)
+    public Task AddAsync(Note note, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(entity);
+        ArgumentNullException.ThrowIfNull(note);
 
-        _ = _dbContext.Notes.Add(NoteEntity.Create(entity));
+        _ = _dbContext.Notes.Add(NoteEntity.Create(note));
 
         return Task.CompletedTask;
     }

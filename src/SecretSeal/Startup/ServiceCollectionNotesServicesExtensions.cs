@@ -8,10 +8,9 @@ using Logic;
 
 using Microsoft.EntityFrameworkCore;
 
-using Models;
-
 using SecretSeal.Configuration;
 using SecretSeal.Services;
+using SecretSeal.UseCases;
 
 using Storage;
 using Storage.Repositories;
@@ -31,6 +30,10 @@ internal static class ServiceCollectionNotesServicesExtensions
 
         _ = services.AddSingleton<ICryptoHelper, CryptoHelper>();
         _ = services.AddSingleton<INoteValidator, NoteValidator>();
+        _ = services.AddScoped<CreateNoteUseCase>();
+        _ = services.AddScoped<TakeNoteUseCase>();
+        _ = services.AddScoped<GetNoteStatsUseCase>();
+        _ = services.AddScoped<GetRetentionPolicyUseCase>();
 
         var storageOptions = configuration
             .GetSection("Storage")
@@ -63,10 +66,11 @@ internal static class ServiceCollectionNotesServicesExtensions
         }
 
         _ = services.AddScoped<INotesCleaner, NotesCleaner>();
+        _ = services.AddSingleton<INotesCleaningExecutor, ScopedNotesCleaningExecutor>();
         _ = services.AddSingleton<INotesCleaningHandler, NotesCleaningHandler>();
         _ = services.AddHostedService<NotesCleanerService>();
         _ = services.AddDbContext<SecretSealDbContext>(o => o.UseSqlServer(connectionString));
-        _ = services.AddScoped<IRepository<Note, NoteId>, NotesRepository>();
+        _ = services.AddScoped<INoteRepository, NotesRepository>();
         _ = services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         _ = services.AddScoped<INotesHandler, StorageNotesHandler>();
         _ = services.Decorate<INotesHandler, CryptoNotesHandler>();

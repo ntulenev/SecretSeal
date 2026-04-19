@@ -1,5 +1,3 @@
-using Models;
-
 namespace Abstractions;
 
 /// <summary>
@@ -10,7 +8,7 @@ public interface IUnitOfWork
     /// <summary>
     /// Gets the notes repository.
     /// </summary>
-    IRepository<Note, NoteId> Notes { get; }
+    INoteRepository Notes { get; }
 
     /// <summary>
     /// Persists pending changes to the underlying store.

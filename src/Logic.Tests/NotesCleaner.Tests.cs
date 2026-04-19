@@ -6,8 +6,6 @@ using Logic.Configuration;
 
 using Microsoft.Extensions.Options;
 
-using Models;
-
 using Moq;
 
 namespace Logic.Tests;
@@ -68,7 +66,7 @@ public sealed class NotesCleanerTests
         const int daysToKeep = 7;
         var cancellationToken = new CancellationToken();
         var options = Options.Create(new NotesCleanerOptions { DaysToKeep = daysToKeep, CleanupInterval = TimeSpan.FromDays(1) });
-        var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
+        var repoMock = new Mock<INoteRepository>(MockBehavior.Strict);
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var cleaner = new NotesCleaner(unitOfWorkMock.Object, options);
 

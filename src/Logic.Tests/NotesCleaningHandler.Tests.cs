@@ -4,7 +4,6 @@ using FluentAssertions;
 
 using Logic.Configuration;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using Moq;
@@ -13,12 +12,12 @@ namespace Logic.Tests;
 
 public sealed class NotesCleaningHandlerTests
 {
-    [Fact(DisplayName = "Constructor throws when scope factory is null")]
+    [Fact(DisplayName = "Constructor throws when executor is null")]
     [Trait("Category", "Unit")]
-    public void ConstructorWhenScopeFactoryIsNullThrowsArgumentNullException()
+    public void ConstructorWhenExecutorIsNullThrowsArgumentNullException()
     {
         // Arrange
-        IServiceScopeFactory scopeFactory = null!;
+        INotesCleaningExecutor executor = null!;
         var options = Options.Create(new NotesCleanerOptions
         {
             DaysToKeep = 1,
@@ -26,7 +25,7 @@ public sealed class NotesCleaningHandlerTests
         });
 
         // Act
-        Action act = () => _ = new NotesCleaningHandler(scopeFactory, options);
+        Action act = () => _ = new NotesCleaningHandler(executor, options);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -37,11 +36,11 @@ public sealed class NotesCleaningHandlerTests
     public void ConstructorWhenOptionsIsNullThrowsArgumentNullException()
     {
         // Arrange
-        var scopeFactory = new Mock<IServiceScopeFactory>(MockBehavior.Strict).Object;
+        var executor = new Mock<INotesCleaningExecutor>(MockBehavior.Strict).Object;
         IOptions<NotesCleanerOptions> options = null!;
 
         // Act
-        Action act = () => _ = new NotesCleaningHandler(scopeFactory, options);
+        Action act = () => _ = new NotesCleaningHandler(executor, options);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -52,12 +51,12 @@ public sealed class NotesCleaningHandlerTests
     public void ConstructorWhenOptionsValueIsNullThrowsArgumentException()
     {
         // Arrange
-        var scopeFactory = new Mock<IServiceScopeFactory>(MockBehavior.Strict).Object;
+        var executor = new Mock<INotesCleaningExecutor>(MockBehavior.Strict).Object;
         var optionsMock = new Mock<IOptions<NotesCleanerOptions>>(MockBehavior.Strict);
         optionsMock.SetupGet(opt => opt.Value).Returns((NotesCleanerOptions)null!);
 
         // Act
-        Action act = () => _ = new NotesCleaningHandler(scopeFactory, optionsMock.Object);
+        Action act = () => _ = new NotesCleaningHandler(executor, optionsMock.Object);
 
         // Assert
         act.Should().Throw<ArgumentException>();
@@ -76,33 +75,17 @@ public sealed class NotesCleaningHandlerTests
 
         using var cts = new CancellationTokenSource();
         var cleanupCalls = 0;
-        var scopeCalls = 0;
 
-        var cleanerMock = new Mock<INotesCleaner>(MockBehavior.Strict);
-        cleanerMock
-            .Setup(c => c.RemoveObsoleteNotesAsync(cts.Token))
+        var executorMock = new Mock<INotesCleaningExecutor>(MockBehavior.Strict);
+        executorMock
+            .Setup(c => c.ExecuteOnceAsync(cts.Token))
             .Callback(() =>
             {
                 cleanupCalls++;
                 cts.Cancel();
             })
             .Returns(Task.CompletedTask);
-
-        var providerMock = new Mock<IServiceProvider>(MockBehavior.Strict);
-        providerMock
-            .Setup(p => p.GetService(typeof(INotesCleaner)))
-            .Returns(cleanerMock.Object);
-
-        var scopeMock = new Mock<IServiceScope>(MockBehavior.Strict);
-        scopeMock.SetupGet(s => s.ServiceProvider).Returns(providerMock.Object);
-        scopeMock
-            .Setup(s => s.Dispose())
-            .Callback(() => scopeCalls++);
-
-        var scopeFactoryMock = new Mock<IServiceScopeFactory>(MockBehavior.Strict);
-        scopeFactoryMock.Setup(f => f.CreateScope()).Returns(scopeMock.Object);
-
-        var handler = new NotesCleaningHandler(scopeFactoryMock.Object, options);
+        var handler = new NotesCleaningHandler(executorMock.Object, options);
 
         // Act
         Func<Task> act = () => handler.RunAsync(cts.Token);
@@ -110,6 +93,6 @@ public sealed class NotesCleaningHandlerTests
         // Assert
         await act.Should().ThrowAsync<OperationCanceledException>();
         cleanupCalls.Should().Be(1);
-        scopeCalls.Should().Be(1);
+        executorMock.VerifyAll();
     }
 }

@@ -48,7 +48,7 @@ public sealed class StorageNotesHandlerTests
         // Arrange
         var note = new Note(new NoteId(Guid.NewGuid()), "content");
         var cancellationToken = new CancellationToken();
-        var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
+        var repoMock = new Mock<INoteRepository>(MockBehavior.Strict);
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
 
@@ -84,7 +84,7 @@ public sealed class StorageNotesHandlerTests
         // Arrange
         const long expected = 3;
         var cancellationToken = new CancellationToken();
-        var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
+        var repoMock = new Mock<INoteRepository>(MockBehavior.Strict);
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
 
@@ -128,7 +128,7 @@ public sealed class StorageNotesHandlerTests
         // Arrange
         var noteId = new NoteId(Guid.NewGuid());
         var cancellationToken = new CancellationToken();
-        var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
+        var repoMock = new Mock<INoteRepository>(MockBehavior.Strict);
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
 
@@ -163,7 +163,7 @@ public sealed class StorageNotesHandlerTests
         var noteId = new NoteId(Guid.NewGuid());
         var note = new Note(noteId, "content");
         var cancellationToken = new CancellationToken();
-        var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
+        var repoMock = new Mock<INoteRepository>(MockBehavior.Strict);
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
 
@@ -201,7 +201,7 @@ public sealed class StorageNotesHandlerTests
         var noteId = new NoteId(Guid.NewGuid());
         var note = new Note(noteId, "content");
         var cancellationToken = new CancellationToken();
-        var repoMock = new Mock<IRepository<Note, NoteId>>(MockBehavior.Strict);
+        var repoMock = new Mock<INoteRepository>(MockBehavior.Strict);
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
 

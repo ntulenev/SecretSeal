@@ -2,24 +2,23 @@ using Abstractions;
 
 using Logic.Configuration;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Logic;
 
 /// <summary>
-/// Resolves and executes the notes cleaner in an isolated scope.
+/// Runs note cleanup on a periodic loop.
 /// </summary>
 public sealed class NotesCleaningHandler : INotesCleaningHandler
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NotesCleaningHandler"/> class.
     /// </summary>
-    /// <param name="scopeFactory">The scope factory used to resolve scoped services. Cannot be null.</param>
+    /// <param name="executor">The executor that performs one cleanup pass. Cannot be null.</param>
     /// <param name="options">The options defining how often cleanup runs. Cannot be null.</param>
-    public NotesCleaningHandler(IServiceScopeFactory scopeFactory, IOptions<NotesCleanerOptions> options)
+    public NotesCleaningHandler(INotesCleaningExecutor executor, IOptions<NotesCleanerOptions> options)
     {
-        ArgumentNullException.ThrowIfNull(scopeFactory);
+        ArgumentNullException.ThrowIfNull(executor);
         ArgumentNullException.ThrowIfNull(options);
 
         if (options.Value is null)
@@ -27,7 +26,7 @@ public sealed class NotesCleaningHandler : INotesCleaningHandler
             throw new ArgumentException("Notes cleaner options are not configured.", nameof(options));
         }
 
-        _scopeFactory = scopeFactory;
+        _executor = executor;
         _options = options.Value;
     }
 
@@ -38,14 +37,11 @@ public sealed class NotesCleaningHandler : INotesCleaningHandler
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using var scope = _scopeFactory.CreateScope();
-            var cleaner = scope.ServiceProvider.GetRequiredService<INotesCleaner>();
-            await cleaner.RemoveObsoleteNotesAsync(cancellationToken).ConfigureAwait(false);
-
+            await _executor.ExecuteOnceAsync(cancellationToken).ConfigureAwait(false);
             await Task.Delay(_options.CleanupInterval, cancellationToken).ConfigureAwait(false);
         }
     }
 
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly INotesCleaningExecutor _executor;
     private readonly NotesCleanerOptions _options;
 }

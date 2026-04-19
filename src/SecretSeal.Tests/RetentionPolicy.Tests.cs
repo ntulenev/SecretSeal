@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 using System.Net;
 using System.Net.Http.Json;
@@ -87,8 +89,11 @@ public sealed class RetentionPolicyTests
             {
                 builder.ConfigureServices(services =>
                 {
+                    services.RemoveAll<SecretSealDbContext>();
+                    services.RemoveAll<DbContextOptions<SecretSealDbContext>>();
+                    services.RemoveAll<IDbContextOptionsConfiguration<SecretSealDbContext>>();
                     _ = services.AddDbContext<SecretSealDbContext>(options =>
-                        options.UseInMemoryDatabase("SecretSealTests"));
+                        options.UseInMemoryDatabase($"SecretSealTests-{Guid.NewGuid()}"));
                 });
             }
         }

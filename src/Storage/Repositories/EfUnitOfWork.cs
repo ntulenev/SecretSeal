@@ -1,7 +1,5 @@
 using Abstractions;
 
-using Models;
-
 namespace Storage.Repositories;
 
 /// <summary>
@@ -14,7 +12,7 @@ public sealed class EfUnitOfWork : IUnitOfWork
     /// </summary>
     /// <param name="dbContext">The database context used for persistence.</param>
     /// <param name="notesRepository">The repository that manages note aggregates.</param>
-    public EfUnitOfWork(SecretSealDbContext dbContext, IRepository<Note, NoteId> notesRepository)
+    public EfUnitOfWork(SecretSealDbContext dbContext, INoteRepository notesRepository)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(notesRepository);
@@ -23,7 +21,7 @@ public sealed class EfUnitOfWork : IUnitOfWork
     }
 
     /// <inheritdoc />
-    public IRepository<Note, NoteId> Notes { get; }
+    public INoteRepository Notes { get; }
 
     /// <inheritdoc />
     public Task SaveChangesAsync(CancellationToken cancellationToken) =>
