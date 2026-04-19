@@ -2,6 +2,7 @@ using Transport;
 
 namespace SecretSeal.Routing;
 
+#pragma warning disable CA1515 // Need for tests
 /// <summary>
 /// Route constraint that validates whether a route parameter
 /// represents a valid <see cref="ShortGuid"/> value.
@@ -16,7 +17,6 @@ namespace SecretSeal.Routing;
 /// It only determines whether the route value can be parsed as a
 /// <see cref="ShortGuid"/>.
 /// </remarks>
-#pragma warning disable CA1515 // Need for tests
 public sealed class ShortGuidRouteConstraint : IRouteConstraint
 #pragma warning restore CA1515 
 {
