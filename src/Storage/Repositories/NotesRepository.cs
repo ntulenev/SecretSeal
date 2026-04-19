@@ -28,14 +28,7 @@ public sealed class NotesRepository : IRepository<Note, NoteId>
     {
         ArgumentNullException.ThrowIfNull(entity);
 
-        var storageEntity = new NoteEntity
-        {
-            Id = entity.Id.Value,
-            Content = entity.Content,
-            CreationDate = DateTimeOffset.UtcNow
-        };
-
-        _ = _dbContext.Notes.Add(storageEntity);
+        _ = _dbContext.Notes.Add(NoteEntity.Create(entity));
 
         return Task.CompletedTask;
     }
@@ -62,9 +55,7 @@ public sealed class NotesRepository : IRepository<Note, NoteId>
 
         var row = rows.FirstOrDefault();
 
-        return row is null
-            ? null
-            : new Note(new NoteId(row.Id), row.Content);
+        return row?.ToDomainNote();
     }
 
     /// <inheritdoc />

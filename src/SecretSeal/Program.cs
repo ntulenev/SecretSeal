@@ -38,7 +38,7 @@ app.MapPost("/notes",
 
 app.MapDelete("/notes/{id:ShortGuid}", async (ShortGuid id, INotesHandler handler, CancellationToken token) =>
 {
-    var noteId = new NoteId(id);
+    var noteId = NoteId.From(id);
     var note = await handler.TakeNoteAsync(noteId, token).ConfigureAwait(false);
     if (note is null)
     {

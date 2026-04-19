@@ -26,6 +26,13 @@ public sealed record NoteId
     }
 
     /// <summary>
+    /// Creates a <see cref="NoteId"/> from an existing non-empty GUID.
+    /// </summary>
+    /// <param name="value">The GUID value.</param>
+    /// <returns>A <see cref="NoteId"/> instance.</returns>
+    public static NoteId From(Guid value) => new(value);
+
+    /// <summary>
     /// Creates a new <see cref="NoteId"/> with a randomly generated GUID.
     /// </summary>
     /// <returns>A new <see cref="NoteId"/> instance.</returns>

@@ -43,6 +43,20 @@ public sealed class NoteIdTests
         noteId.Value.Should().NotBe(Guid.Empty);
     }
 
+    [Fact(DisplayName = "From creates a NoteId from an existing guid")]
+    [Trait("Category", "Unit")]
+    public void FromWhenValueIsNotEmptySetsValue()
+    {
+        // Arrange
+        var value = Guid.NewGuid();
+
+        // Act
+        var noteId = NoteId.From(value);
+
+        // Assert
+        noteId.Value.Should().Be(value);
+    }
+
     [Fact(DisplayName = "Equals and GetHashCode use value semantics")]
     [Trait("Category", "Unit")]
     public void EqualsAndGetHashCodeUseValueSemantics()

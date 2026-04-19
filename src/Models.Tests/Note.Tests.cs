@@ -97,4 +97,35 @@ public sealed class NoteTests
         note.Id.Value.Should().NotBe(Guid.Empty);
         note.Content.Should().Be(content);
     }
+
+    [Fact(DisplayName = "WithContent keeps id and changes content")]
+    [Trait("Category", "Unit")]
+    public void WithContentWhenContentIsValidCreatesCopyWithSameId()
+    {
+        // Arrange
+        var note = new Note(new NoteId(Guid.NewGuid()), "hello");
+
+        // Act
+        var updated = note.WithContent("updated");
+
+        // Assert
+        updated.Id.Should().Be(note.Id);
+        updated.Content.Should().Be("updated");
+    }
+
+    [Fact(DisplayName = "Restore rehydrates a note from persisted values")]
+    [Trait("Category", "Unit")]
+    public void RestoreWhenArgumentsAreValidCreatesNote()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        const string content = "persisted";
+
+        // Act
+        var note = Note.Restore(id, content);
+
+        // Assert
+        note.Id.Value.Should().Be(id);
+        note.Content.Should().Be(content);
+    }
 }

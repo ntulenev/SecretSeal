@@ -36,6 +36,21 @@ public sealed record Note
     }
 
     /// <summary>
+    /// Creates a copy of this <see cref="Note"/> with updated content.
+    /// </summary>
+    /// <param name="content">The new note content.</param>
+    /// <returns>A new <see cref="Note"/> instance that keeps the same identifier.</returns>
+    public Note WithContent(string content) => new(Id, content);
+
+    /// <summary>
+    /// Rehydrates a <see cref="Note"/> from persisted values.
+    /// </summary>
+    /// <param name="id">The persisted note identifier.</param>
+    /// <param name="content">The persisted note content.</param>
+    /// <returns>A rehydrated <see cref="Note"/> instance.</returns>
+    public static Note Restore(Guid id, string content) => new(NoteId.From(id), content);
+
+    /// <summary>
     /// Creates a new <see cref="Note"/> with a newly generated identifier and the current time.
     /// </summary>
     /// <param name="content">The content of the note.</param>

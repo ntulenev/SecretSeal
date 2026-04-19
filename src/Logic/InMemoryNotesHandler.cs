@@ -40,10 +40,9 @@ public class InMemoryNotesHandler : INotesHandler
     {
         ArgumentNullException.ThrowIfNull(noteId);
 
-        return !_notes.TryRemove(noteId, out var note) ?
-            Task.FromResult<Note?>(null!)
-            :
-            Task.FromResult<Note?>(note);
+        return _notes.TryRemove(noteId, out var note)
+            ? Task.FromResult<Note?>(note)
+            : Task.FromResult<Note?>(null);
     }
 
     /// <summary>

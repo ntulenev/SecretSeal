@@ -39,7 +39,7 @@ public class CryptoNotesHandler : INotesHandler
     public async Task AddNoteAsync(Note note, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(note);
-        var newNote = new Note(note.Id, _cryptoHelper.Encrypt(note.Content));
+        var newNote = note.WithContent(_cryptoHelper.Encrypt(note.Content));
         await _notesHandler.AddNoteAsync(newNote, cancellationToken).ConfigureAwait(false);
     }
 
@@ -63,10 +63,7 @@ public class CryptoNotesHandler : INotesHandler
     {
         ArgumentNullException.ThrowIfNull(noteId);
         var result = await _notesHandler.TakeNoteAsync(noteId, cancellationToken).ConfigureAwait(false);
-        return result is null
-            ?
-            null :
-            new Note(result.Id, _cryptoHelper.Decrypt(result.Content));
+        return result?.WithContent(_cryptoHelper.Decrypt(result.Content));
     }
 
     private readonly INotesHandler _notesHandler;
