@@ -52,29 +52,30 @@ public sealed class StorageNotesHandlerTests
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
 
-        var uowCount = 0;
-        var repoCount = 0;
+        var notesCalls = 0;
+        var addCalls = 0;
+        var saveCalls = 0;
 
         unitOfWorkMock
             .SetupGet(work => work.Notes)
+            .Callback(() => notesCalls++)
             .Returns(repoMock.Object);
         repoMock
             .Setup(repo => repo.AddAsync(note, cancellationToken))
-            .Callback(() => repoCount++)
+            .Callback(() => addCalls++)
             .Returns(Task.CompletedTask);
         unitOfWorkMock
             .Setup(work => work.SaveChangesAsync(cancellationToken))
-            .Callback(() => uowCount++)
+            .Callback(() => saveCalls++)
             .Returns(Task.CompletedTask);
 
         // Act
         await handler.AddNoteAsync(note, cancellationToken);
 
         // Assert
-        repoMock.VerifyAll();
-        unitOfWorkMock.VerifyAll();
-        uowCount.Should().Be(1);
-        repoCount.Should().Be(1);
+        notesCalls.Should().Be(1);
+        addCalls.Should().Be(1);
+        saveCalls.Should().Be(1);
     }
 
     [Fact(DisplayName = "GetNotesCountAsync returns repository count")]
@@ -87,12 +88,16 @@ public sealed class StorageNotesHandlerTests
         var repoMock = new Mock<INoteRepository>(MockBehavior.Strict);
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
+        var notesCalls = 0;
+        var countCalls = 0;
 
         unitOfWorkMock
             .SetupGet(work => work.Notes)
+            .Callback(() => notesCalls++)
             .Returns(repoMock.Object);
         repoMock
             .Setup(repo => repo.CountAsync(cancellationToken))
+            .Callback(() => countCalls++)
             .ReturnsAsync(expected);
 
         // Act
@@ -100,8 +105,8 @@ public sealed class StorageNotesHandlerTests
 
         // Assert
         result.Should().Be(expected);
-        repoMock.VerifyAll();
-        unitOfWorkMock.VerifyAll();
+        notesCalls.Should().Be(1);
+        countCalls.Should().Be(1);
     }
 
     [Fact(DisplayName = "TakeNoteAsync throws when note id is null")]
@@ -132,17 +137,21 @@ public sealed class StorageNotesHandlerTests
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
 
-        var uowCount = 0;
+        var notesCalls = 0;
+        var consumeCalls = 0;
+        var saveCalls = 0;
 
         unitOfWorkMock
             .SetupGet(work => work.Notes)
+            .Callback(() => notesCalls++)
             .Returns(repoMock.Object);
         unitOfWorkMock
            .Setup(work => work.SaveChangesAsync(cancellationToken))
-           .Callback(() => uowCount++)
+           .Callback(() => saveCalls++)
            .Returns(Task.CompletedTask);
         repoMock
             .Setup(repo => repo.ConsumeAsync(noteId, cancellationToken))
+            .Callback(() => consumeCalls++)
             .ReturnsAsync((Note?)null);
 
         // Act
@@ -150,9 +159,9 @@ public sealed class StorageNotesHandlerTests
 
         // Assert
         result.Should().BeNull();
-        repoMock.VerifyAll();
-        unitOfWorkMock.VerifyAll();
-        uowCount.Should().Be(1);
+        notesCalls.Should().Be(1);
+        consumeCalls.Should().Be(1);
+        saveCalls.Should().Be(1);
     }
 
     [Fact(DisplayName = "TakeNoteAsync removes note and saves changes")]
@@ -167,19 +176,21 @@ public sealed class StorageNotesHandlerTests
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
 
-        var removeCount = 0;
-        var uowCount = 0;
+        var notesCalls = 0;
+        var consumeCalls = 0;
+        var saveCalls = 0;
 
         unitOfWorkMock
             .SetupGet(work => work.Notes)
+            .Callback(() => notesCalls++)
             .Returns(repoMock.Object);
         repoMock
             .Setup(repo => repo.ConsumeAsync(noteId, cancellationToken))
-            .Callback(() => removeCount++)
+            .Callback(() => consumeCalls++)
             .Returns(Task.FromResult<Note?>(note));
         unitOfWorkMock
             .Setup(work => work.SaveChangesAsync(cancellationToken))
-            .Callback(() => uowCount++)
+            .Callback(() => saveCalls++)
             .Returns(Task.CompletedTask);
 
         // Act
@@ -187,10 +198,9 @@ public sealed class StorageNotesHandlerTests
 
         // Assert
         result.Should().Be(note);
-        repoMock.VerifyAll();
-        unitOfWorkMock.VerifyAll();
-        removeCount.Should().Be(1);
-        uowCount.Should().Be(1);
+        notesCalls.Should().Be(1);
+        consumeCalls.Should().Be(1);
+        saveCalls.Should().Be(1);
     }
 
     [Fact(DisplayName = "TakeNoteAsync does not remove note due race condition (note does not exists on a moment of remove operation")]
@@ -205,19 +215,21 @@ public sealed class StorageNotesHandlerTests
         var unitOfWorkMock = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new StorageNotesHandler(unitOfWorkMock.Object);
 
-        var removeCount = 0;
-        var uowCount = 0;
+        var notesCalls = 0;
+        var consumeCalls = 0;
+        var saveCalls = 0;
 
         unitOfWorkMock
             .SetupGet(work => work.Notes)
+            .Callback(() => notesCalls++)
             .Returns(repoMock.Object);
         unitOfWorkMock
             .Setup(work => work.SaveChangesAsync(cancellationToken))
-            .Callback(() => uowCount++)
+            .Callback(() => saveCalls++)
             .Returns(Task.CompletedTask);
         repoMock
             .Setup(repo => repo.ConsumeAsync(noteId, cancellationToken))
-            .Callback(() => removeCount++)
+            .Callback(() => consumeCalls++)
             .Returns(Task.FromResult<Note?>(note));
 
         // Act
@@ -225,9 +237,8 @@ public sealed class StorageNotesHandlerTests
 
         // Assert
         result.Should().Be(note);
-        repoMock.VerifyAll();
-        unitOfWorkMock.VerifyAll();
-        removeCount.Should().Be(1);
-        uowCount.Should().Be(1);
+        notesCalls.Should().Be(1);
+        consumeCalls.Should().Be(1);
+        saveCalls.Should().Be(1);
     }
 }
