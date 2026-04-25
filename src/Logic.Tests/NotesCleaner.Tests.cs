@@ -71,11 +71,13 @@ public sealed class NotesCleanerTests
         var cleaner = new NotesCleaner(unitOfWorkMock.Object, options);
 
         var before = DateTimeOffset.UtcNow;
+        var notesCalls = 0;
         var removeCalls = 0;
         var saveCalls = 0;
 
         unitOfWorkMock
             .SetupGet(work => work.Notes)
+            .Callback(() => notesCalls++)
             .Returns(repoMock.Object);
         repoMock
             .Setup(repo => repo.RemoveObsoleteNotesAsync(
@@ -94,8 +96,7 @@ public sealed class NotesCleanerTests
         await cleaner.RemoveObsoleteNotesAsync(cancellationToken);
 
         // Assert
-        repoMock.VerifyAll();
-        unitOfWorkMock.VerifyAll();
+        notesCalls.Should().Be(1);
         removeCalls.Should().Be(1);
         saveCalls.Should().Be(1);
     }

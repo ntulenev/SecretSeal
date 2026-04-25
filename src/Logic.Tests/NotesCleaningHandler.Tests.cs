@@ -93,7 +93,6 @@ public sealed class NotesCleaningHandlerTests
         // Assert
         await act.Should().ThrowAsync<OperationCanceledException>();
         cleanupCalls.Should().Be(1);
-        executorMock.VerifyAll();
     }
 
     [Fact(DisplayName = "RunAsync stops before first execution when token is already cancelled")]
@@ -110,13 +109,18 @@ public sealed class NotesCleaningHandlerTests
         await cts.CancelAsync();
         var executorMock = new Mock<INotesCleaningExecutor>(MockBehavior.Strict);
         var handler = new NotesCleaningHandler(executorMock.Object, options);
+        var cleanupCalls = 0;
+        executorMock
+            .Setup(executor => executor.ExecuteOnceAsync(cts.Token))
+            .Callback(() => cleanupCalls++)
+            .Returns(Task.CompletedTask);
 
         // Act
         Func<Task> act = () => handler.RunAsync(cts.Token);
 
         // Assert
         await act.Should().ThrowAsync<OperationCanceledException>();
-        executorMock.VerifyNoOtherCalls();
+        cleanupCalls.Should().Be(0);
     }
 
     [Fact(DisplayName = "RunAsync cancels during delay after cleanup pass completes")]
@@ -154,6 +158,5 @@ public sealed class NotesCleaningHandlerTests
         // Assert
         await act.Should().ThrowAsync<OperationCanceledException>();
         cleanupCalls.Should().Be(1);
-        executorMock.VerifyAll();
     }
 }

@@ -31,6 +31,9 @@ public sealed class ScopedNotesCleaningExecutorTests
         // Arrange
         var cancellationToken = new CancellationToken();
         var cleanupCalls = 0;
+        var createScopeCalls = 0;
+        var serviceProviderCalls = 0;
+        var getServiceCalls = 0;
         var scopeDisposeCalls = 0;
 
         var cleanerMock = new Mock<INotesCleaner>(MockBehavior.Strict);
@@ -42,10 +45,14 @@ public sealed class ScopedNotesCleaningExecutorTests
         var providerMock = new Mock<IServiceProvider>(MockBehavior.Strict);
         providerMock
             .Setup(p => p.GetService(typeof(INotesCleaner)))
+            .Callback(() => getServiceCalls++)
             .Returns(cleanerMock.Object);
 
         var scopeMock = new Mock<IServiceScope>(MockBehavior.Strict);
-        scopeMock.SetupGet(s => s.ServiceProvider).Returns(providerMock.Object);
+        scopeMock
+            .SetupGet(s => s.ServiceProvider)
+            .Callback(() => serviceProviderCalls++)
+            .Returns(providerMock.Object);
         scopeMock
             .Setup(s => s.Dispose())
             .Callback(() => scopeDisposeCalls++);
@@ -53,6 +60,7 @@ public sealed class ScopedNotesCleaningExecutorTests
         var scopeFactoryMock = new Mock<IServiceScopeFactory>(MockBehavior.Strict);
         scopeFactoryMock
             .Setup(f => f.CreateScope())
+            .Callback(() => createScopeCalls++)
             .Returns(scopeMock.Object);
 
         var executor = new ScopedNotesCleaningExecutor(scopeFactoryMock.Object);
@@ -61,8 +69,9 @@ public sealed class ScopedNotesCleaningExecutorTests
         await executor.ExecuteOnceAsync(cancellationToken);
 
         // Assert
-        cleanerMock.VerifyAll();
-        scopeFactoryMock.VerifyAll();
+        createScopeCalls.Should().Be(1);
+        serviceProviderCalls.Should().Be(1);
+        getServiceCalls.Should().Be(1);
         cleanupCalls.Should().Be(1);
         scopeDisposeCalls.Should().Be(1);
     }
