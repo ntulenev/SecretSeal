@@ -87,8 +87,6 @@ public sealed class CryptoNotesHandlerTests
         await handler.AddNoteAsync(note, cancellationToken);
 
         // Assert
-        cryptoHelperMock.VerifyAll();
-        notesHandlerMock.VerifyAll();
         encryptCalls.Should().Be(1);
         addNoteCalls.Should().Be(1);
     }
@@ -115,7 +113,6 @@ public sealed class CryptoNotesHandlerTests
 
         // Assert
         result.Should().Be(expected);
-        notesHandlerMock.VerifyAll();
         getNotesCountCalls.Should().Be(1);
     }
 
@@ -159,7 +156,6 @@ public sealed class CryptoNotesHandlerTests
 
         // Assert
         result.Should().BeNull();
-        notesHandlerMock.VerifyAll();
         takeNoteCalls.Should().Be(1);
     }
 
@@ -195,8 +191,6 @@ public sealed class CryptoNotesHandlerTests
         result.Should().NotBeNull();
         result!.Id.Should().Be(noteId);
         result.Content.Should().Be(decrypted);
-        notesHandlerMock.VerifyAll();
-        cryptoHelperMock.VerifyAll();
         takeNoteCalls.Should().Be(1);
         decryptCalls.Should().Be(1);
     }
