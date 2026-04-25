@@ -96,6 +96,31 @@ public sealed class SecretSealApiTests
         deletePayload.GetProperty("note").GetString().Should().Be(note);
     }
 
+    [Fact(DisplayName = "DELETE /notes/{id} consumes note only once")]
+    [Trait("Category", "Integration")]
+    public async Task DeleteWhenNoteIsAlreadyConsumedReturnsNotFound()
+    {
+        // Arrange
+        using var factory = CreateFactory();
+        using var client = factory.CreateClient();
+        var note = "one time";
+
+        var createResponse = await client.PostAsJsonAsync("/notes", new { note });
+        var createPayload = await createResponse.Content.ReadFromJsonAsync<JsonElement>();
+        var noteId = createPayload.GetProperty("id").GetString();
+
+        // Act
+        var firstDeleteResponse = await client.DeleteAsync($"/notes/{noteId}");
+        var secondDeleteResponse = await client.DeleteAsync($"/notes/{noteId}");
+        var secondDeletePayload = await secondDeleteResponse.Content.ReadFromJsonAsync<JsonElement>();
+
+        // Assert
+        createResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        firstDeleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        secondDeleteResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        secondDeletePayload.GetProperty("error").GetString().Should().Be("Note not found (or already consumed).");
+    }
+
     [Fact(DisplayName = "DELETE /notes/{id} returns not found for missing note")]
     [Trait("Category", "Integration")]
     public async Task DeleteWhenNoteDoesNotExistReturnsNotFound()
