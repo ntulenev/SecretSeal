@@ -139,6 +139,21 @@ public sealed class SecretSealApiTests
         payload.GetProperty("error").GetString().Should().Be("Note not found (or already consumed).");
     }
 
+    [Fact(DisplayName = "DELETE /notes/{id} rejects invalid route id")]
+    [Trait("Category", "Integration")]
+    public async Task DeleteWhenRouteIdIsInvalidReturnsNotFound()
+    {
+        // Arrange
+        using var factory = CreateFactory();
+        using var client = factory.CreateClient();
+
+        // Act
+        var response = await client.DeleteAsync("/notes/not-a-guid");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
     [Fact(DisplayName = "GET /stat returns note count and encryption flag")]
     [Trait("Category", "Integration")]
     public async Task GetStatsReturnsCountAndEncryptionFlag()
