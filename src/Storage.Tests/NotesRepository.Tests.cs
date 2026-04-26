@@ -76,7 +76,6 @@ public sealed class NotesRepositoryTests
 
         // Assert
         count.Should().Be(2);
-        count.Should().Be(2);
     }
 
     private static SecretSealDbContext CreateContext()
