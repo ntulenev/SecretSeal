@@ -96,6 +96,10 @@ The same flow adapts to a narrow screen. These screenshots were captured at a 39
 
 </details>
 
+### Testing
+
+See [testing and coverage](docs/testing.md) for the test layers, coverage audit, and commands for running the SQL Server and browser smoke tests.
+
 ### 🔐 Encryption
 
 #### Client-side encryption
@@ -170,15 +174,15 @@ Returns basic runtime statistics.
 ### Project version
 
 The footer on both pages loads the running application's SemVer from **GET `/version`**.
-The default version is `1.0.0`, set in `src/SecretSeal/SecretSeal.csproj`; the UI does not contain a separate version number.
+The default version is `1.0.1`, set in `src/SecretSeal/SecretSeal.csproj`; the UI does not contain a separate version number.
 
-Pushing a SemVer tag such as `v1.0.0` (or `1.0.0`) runs `.github/workflows/release-build.yml`.
-It validates the tag, tests the application, and creates a deployable `SecretSeal-1.0.0` artifact with that version embedded in the assembly. Deploy that artifact to display the tag's version on the site. The workflow does not deploy automatically.
+Pushing a SemVer tag such as `v1.0.1` (or `1.0.1`) runs `.github/workflows/release-build.yml`.
+It validates the tag, tests the application, and creates a deployable `SecretSeal-1.0.1` artifact with that version embedded in the assembly. Deploy that artifact to display the tag's version on the site. The workflow does not deploy automatically.
 
 For a manual build, pass the release version explicitly:
 
 ```sh
-dotnet publish src/SecretSeal/SecretSeal.csproj -c Release -p:Version=1.0.0 -o artifacts/SecretSeal
+dotnet publish src/SecretSeal/SecretSeal.csproj -c Release -p:Version=1.0.1 -o artifacts/SecretSeal
 ```
 
 Prerelease versions and build metadata (for example, `1.1.0-rc.1+build.42`) are preserved. The SDK's automatic Git SHA suffix is disabled so the footer matches the supplied SemVer exactly. See the [.NET assembly version documentation](https://learn.microsoft.com/dotnet/standard/assembly/set-attributes-project-file).
