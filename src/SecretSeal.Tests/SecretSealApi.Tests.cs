@@ -21,6 +21,50 @@ namespace SecretSeal.Tests;
 
 public sealed class SecretSealApiTests
 {
+    [Theory(DisplayName = "The home and recipient pages serve their browser scripts")]
+    [InlineData("/", "Create a secret", "/js/index.js")]
+    [InlineData("/read.html", "Open & destroy", "/js/read.js")]
+    [Trait("Category", "Integration")]
+    public async Task PagesServeTheirBrowserScripts(string path, string expectedContent, string scriptPath)
+    {
+        using var factory = CreateFactory();
+        using var client = factory.CreateClient();
+
+        var page = await client.GetAsync(path);
+        var html = await page.Content.ReadAsStringAsync();
+        var script = await client.GetAsync(scriptPath);
+
+        page.StatusCode.Should().Be(HttpStatusCode.OK);
+        page.Content.Headers.ContentType!.MediaType.Should().Be("text/html");
+        html.Should().Contain(expectedContent);
+        script.StatusCode.Should().Be(HttpStatusCode.OK);
+        script.Content.Headers.ContentType!.MediaType.Should().Contain("javascript");
+    }
+
+    [Fact(DisplayName = "A secret created by one client can be consumed only once by another")]
+    [Trait("Category", "Integration")]
+    public async Task SeparateClientsShareOneTimeSecret()
+    {
+        using var factory = CreateFactory();
+        using var sender = factory.CreateClient();
+        using var recipient = factory.CreateClient();
+        const string note = "private message";
+
+        var createResponse = await sender.PostAsJsonAsync("/notes", new { note });
+        var createBody = await createResponse.Content.ReadAsStringAsync();
+        var noteId = JsonSerializer.Deserialize<JsonElement>(createBody).GetProperty("id").GetString();
+
+        var consumeResponse = await recipient.DeleteAsync($"/notes/{noteId}");
+        var consumePayload = await consumeResponse.Content.ReadFromJsonAsync<JsonElement>();
+        var repeatedResponse = await sender.DeleteAsync($"/notes/{noteId}");
+
+        createResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        createBody.Should().NotContain(note);
+        consumeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        consumePayload.GetProperty("note").GetString().Should().Be(note);
+        repeatedResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
     [Fact(DisplayName = "GET /version returns the running application's release version without caching")]
     [Trait("Category", "Integration")]
     public async Task GetVersionReturnsAssemblyInformationalVersion()
