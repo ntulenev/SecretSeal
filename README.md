@@ -4,7 +4,7 @@
 
 It allows you to create **one-time readable messages** that are **automatically destroyed after being opened**.
 
-![Screenshot](Screenshot.png)
+![Screenshot](Screenshot.jpg)
 
 SecretSeal runs on your own hosting, giving you full control over your data
 
@@ -86,6 +86,22 @@ Returns basic runtime statistics.
 | notesCount | Total number of stored notes |
 | encryptionEnabled | Indicates whether notes are stored in the system in encrypted or plain text form |
 | isInMemory | Indicates whether the application is currently using in-memory storage instead of a database |
+
+### Project version
+
+The footer on both pages loads the running application's SemVer from **GET `/version`**.
+The default version is `1.0.0`, set in `src/SecretSeal/SecretSeal.csproj`; the UI does not contain a separate version number.
+
+Pushing a SemVer tag such as `v1.0.0` (or `1.0.0`) runs `.github/workflows/release-build.yml`.
+It validates the tag, tests the application, and creates a deployable `SecretSeal-1.0.0` artifact with that version embedded in the assembly. Deploy that artifact to display the tag's version on the site. The workflow does not deploy automatically.
+
+For a manual build, pass the release version explicitly:
+
+```sh
+dotnet publish src/SecretSeal/SecretSeal.csproj -c Release -p:Version=1.0.0 -o artifacts/SecretSeal
+```
+
+Prerelease versions and build metadata (for example, `1.1.0-rc.1+build.42`) are preserved. The SDK's automatic Git SHA suffix is disabled so the footer matches the supplied SemVer exactly. See the [.NET assembly version documentation](https://learn.microsoft.com/dotnet/standard/assembly/set-attributes-project-file).
 
 ### Retention policy
 

@@ -1,0 +1,44 @@
+name: Build tagged release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+      - '[0-9]*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Read SemVer from the release tag
+        id: version
+        shell: python
+        run: |
+          import os
+          import re
+          version = os.environ['GITHUB_REF_NAME'].removeprefix('v')
+          pattern = r'(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?'
+          if not re.fullmatch(pattern, version, flags=re.ASCII):
+              raise SystemExit('The release tag must be a SemVer, optionally prefixed with v.')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'version={version}\n')
+      - name: Test application
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: dotnet test src/SecretSeal.Tests/SecretSeal.Tests.csproj -c Release -p:Version="$RELEASE_VERSION"
+      - name: Publish with the tag version
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: dotnet publish src/SecretSeal/SecretSeal.csproj -c Release -p:Version="$RELEASE_VERSION" -o artifacts/SecretSeal
+      - uses: actions/upload-artifact@v7
+        with:
+          name: SecretSeal-${{ steps.version.outputs.version }}
+          path: artifacts/SecretSeal
+          if-no-files-found: error
