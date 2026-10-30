@@ -4,7 +4,7 @@
 
 It allows you to create **one-time readable messages** that are **automatically destroyed after being opened**.
 
-![Screenshot](Screenshot.jpg)
+![SecretSeal dark UI: compose a secret and open a received link](docs/screenshots/01-create-secret.jpg)
 
 SecretSeal runs on your own hosting, giving you full control over your data
 
@@ -15,6 +15,86 @@ SecretSeal runs on your own hosting, giving you full control over your data
 - 💾 Flexible storage — choose between InMemory mode or a database storage
 - 🚫 No ads, no tracking
 - 🤝 Perfect for personal use and sharing secrets with friends
+
+### UI walkthrough
+
+These full-page screenshots show the current dark theme, pixel-art mascot, and version footer on a local `1.0.0` build. All messages are demonstration data; the links shown were consumed during capture and cannot be used to retrieve a secret.
+
+**1. Create a secret.** Enter a message and choose **Create secret link**, as shown above. The message is encrypted in the browser before being sent to the server.
+
+<details>
+<summary>2. Share the generated link or secret ID</summary>
+
+Copy the complete link with **Copy link**, or expand **Or share a secret ID** to use **Copy ID**. Both include the decryption key. Share the complete value with the recipient.
+
+![Secret created, with the share link and expanded secret ID](docs/screenshots/02-share-link.jpg)
+
+</details>
+
+<details>
+<summary>3. Open the received link</summary>
+
+Visiting the link shows a confirmation screen. The secret is only consumed when the recipient chooses **Open & destroy**.
+
+![Recipient confirmation before opening a secret](docs/screenshots/03-open-secret.jpg)
+
+</details>
+
+<details>
+<summary>4. Read the secret once</summary>
+
+The decrypted message appears on the recipient's screen, and the stored secret is deleted. Keep any information you need before leaving: the link cannot be opened again.
+
+![Decrypted message and confirmation that the secret was deleted](docs/screenshots/04-read-once.jpg)
+
+</details>
+
+<details>
+<summary>5. Read a link or ID directly on the home page</summary>
+
+Alternatively, paste the complete link or composite ID (including its key) into **Have a secret?** and choose **Read & destroy**. The message appears below the input.
+
+![Reading a received secret directly on the home page](docs/screenshots/05-read-from-home.jpg)
+
+</details>
+
+<details>
+<summary>6. Try to reopen an already consumed secret</summary>
+
+A second attempt shows **Secret unavailable**. An expired or incomplete link can also lead to this state; ask the sender for a new link.
+
+![Unavailable secret with a compact error message in the dark theme](docs/screenshots/06-secret-unavailable.jpg)
+
+</details>
+
+<details>
+<summary>7. Submit an empty message or secret ID</summary>
+
+Inline validation explains which value is required without navigating away from the form.
+
+![Required-field validation for the create and read forms](docs/screenshots/07-form-validation.jpg)
+
+</details>
+
+<details>
+<summary>8. Visit the read page without a secret link</summary>
+
+Opening the read page without an ID shows **A link is missing** and keeps the open action disabled.
+
+![Read page with a missing secret ID](docs/screenshots/08-missing-link.jpg)
+
+</details>
+
+<details>
+<summary>Mobile UI: creating and reading a secret</summary>
+
+The same flow adapts to a narrow screen. These screenshots were captured at a 390-pixel viewport width.
+
+| Create a secret | Read a secret |
+| --- | --- |
+| <img src="docs/screenshots/09-mobile-create.jpg" alt="Mobile secret creation form" width="320" /> | <img src="docs/screenshots/10-mobile-read.jpg" alt="Mobile view of a decrypted one-time secret" width="320" /> |
+
+</details>
 
 ### 🔐 Encryption
 
