@@ -1,3 +1,5 @@
+import "./version.js?v=20261030";
+
 import {
     NOT_FOUND,
     mustGet,
@@ -9,7 +11,7 @@ import {
     utf8,
     randBytes,
     importAesKeyFromB64url,
-} from "./shared.js";
+} from "./shared.js?v=20261030";
 
 // =============================
 // Constants
@@ -110,16 +112,19 @@ async function copyText(text) {
     }
 }
 
-async function copyFrom(el) {
+async function copyFrom(el, button) {
     const text = (el.textContent || "").trim();
     if (!text) return;
 
+    if (button.disabled) return;
+    button.disabled = true;
+    const oldLabel = button.textContent;
     const ok = await copyText(text);
-
-    // small, non-invasive feedback
-    const old = el.textContent;
-    el.textContent = ok ? (old + "  ✅ Copied") : (old + "  ❌ Copy failed");
-    setTimeout(() => { el.textContent = old; }, 900);
+    button.textContent = ok ? "Copied!" : "Try again";
+    setTimeout(() => {
+        button.textContent = oldLabel;
+        button.disabled = false;
+    }, 1200);
 }
 
 // =============================
@@ -208,6 +213,7 @@ function buildReadLink(id, key) {
 // Actions
 // =============================
 async function createNote() {
+    if (els.createBtn.disabled) return;
     setResult(els.createResult, null, "");
     hideShare();
 
@@ -237,7 +243,7 @@ async function createNote() {
         const compositeId = `${id}#k=${enc.keyB64url}`;
         const link = buildReadLink(id, enc.keyB64url);
 
-        setResult(els.createResult, "success", "Secret created! Share it using composite ID or link below:");
+        setResult(els.createResult, "success", "Secret sealed. Your link is ready to share.");
         showShare({ compositeId, link });
 
         try {
@@ -262,6 +268,7 @@ async function createNote() {
 }
 
 async function readNote() {
+    if (els.readBtn.disabled) return;
     setResult(els.readResult, null, "");
 
     const { id, key } = parseCompositeId(els.readId.value);
@@ -298,8 +305,8 @@ async function readNote() {
 els.createBtn.addEventListener("click", createNote);
 els.readBtn.addEventListener("click", readNote);
 
-els.copyIdBtn.addEventListener("click", () => copyFrom(els.guidBox));
-els.copyLinkBtn.addEventListener("click", () => copyFrom(els.linkBox));
+els.copyIdBtn.addEventListener("click", () => copyFrom(els.guidBox, els.copyIdBtn));
+els.copyLinkBtn.addEventListener("click", () => copyFrom(els.linkBox, els.copyLinkBtn));
 
 // Nice-to-have: Ctrl/Cmd+Enter submits
 els.createNote.addEventListener("keydown", (e) => {

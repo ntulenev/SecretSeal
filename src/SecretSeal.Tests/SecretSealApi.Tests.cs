@@ -12,6 +12,7 @@ using Logic;
 
 using System.Net;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Text.Json;
 
 using Transport;
@@ -20,6 +21,23 @@ namespace SecretSeal.Tests;
 
 public sealed class SecretSealApiTests
 {
+    [Fact(DisplayName = "GET /version returns the running application's release version without caching")]
+    [Trait("Category", "Integration")]
+    public async Task GetVersionReturnsAssemblyInformationalVersion()
+    {
+        using var factory = CreateFactory();
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/version");
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var expected = typeof(Program).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        payload.GetProperty("version").GetString().Should().Be(expected);
+        response.Headers.CacheControl!.NoStore.Should().BeTrue();
+    }
+
     [Fact(DisplayName = "GET /hc returns healthy status")]
     [Trait("Category", "Integration")]
     public async Task GetHealthCheckReturnsHealthyStatus()

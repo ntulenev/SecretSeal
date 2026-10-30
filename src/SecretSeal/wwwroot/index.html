@@ -1,79 +1,84 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Secret Seal</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/css/shared.css?v=20260214.1" />
-    <link rel="stylesheet" href="/css/index.css?v=20260214.1" />
+    <meta name="description" content="Create an encrypted, one-time secret. Share a link. Once opened, it's gone." />
+    <meta name="theme-color" content="#090f1a" />
+    <title>SecretSeal — One-time secrets</title>
+    <link rel="icon" type="image/png" href="/secret-seal.png" />
+    <link rel="stylesheet" href="/css/shared.css?v=20261030.3" />
+    <link rel="stylesheet" href="/css/index.css?v=20261030.2" />
 </head>
-
 <body>
-    <h1>
-        <img class="logo-mark" src="/secret_logo.png" alt="SecretSeal logo" />SecretSeal
-    </h1>
-
-    <section>
-        <h2>🔐 Create a secret</h2>
-
-        <textarea id="createNote" rows="5" placeholder="Enter your secret..."></textarea>
-
-        <div class="actions">
-            <button id="createBtn" type="button">Create</button>
-        </div>
-
-        <div id="createResult" class="result"></div>
-
-        <div id="createShare" style="display:none;">
-            <div class="row">
-                <div class="pill" id="guidBox"></div>
-                <button class="copy-btn" id="copyIdBtn" type="button">Copy ID</button>
-            </div>
-
-            <div class="row">
-                <div class="pill" id="linkBox"></div>
-                <button class="copy-btn" id="copyLinkBtn" type="button">Copy link</button>
-            </div>
-
-            <div class="mini">
-                <b>Client-side encryption.</b> The key part (<code>#k=</code>) is not sent to server.
-            </div>
-            <div class="mini" id="retentionNote" style="display:none;"></div>
-        </div>
-
-        <div class="hint">Creates a one-time note and returns a ID you can share.</div>
-    </section>
-
-    <section>
-        <h2>🔥 Read & destroy a secret</h2>
-
-        <input id="readId" placeholder="Enter secret ID" />
-        <div class="actions">
-            <button id="readBtn" type="button">Read & Destroy</button>
-        </div>
-
-        <div id="readResult" class="result"></div>
-        <div class="hint">This will delete the note immediately after reading.</div>
-    </section>
-
-    <footer>
-        <div class="footer-inner">
-            <div class="footer-text">SecretSeal — read once, vanish forever</div>
-
-            <a class="source-link"
-               href="https://github.com/ntulenev/SecretSeal"
-               target="_blank"
-               rel="noopener noreferrer">
-                ⚙️ Project source on GitHub
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="brand" href="/" aria-label="SecretSeal home">
+                <img src="/secret-seal.png" width="48" height="48" alt="" />
+                <span>SecretSeal<span class="brand-dot">.</span></span>
             </a>
-
-            <small>Personal pet project for private use · Not intended for public use</small>
-        </div>
-    </footer>
-
-    <script type="module" src="/js/index.js?v=20260214"></script>
+            <span class="header-note"><span class="status-dot" aria-hidden="true"></span> For your eyes only</span>
+        </header>
+        <main id="main">
+            <div class="intro">
+                <div>
+                    <p class="eyebrow">A LITTLE PRIVACY GOES A LONG WAY</p>
+                    <h1>Some things are<br />best read <span>once.</span></h1>
+                    <p class="intro-copy">Leave a secret. Share the link.<br />After one read, it disappears.</p>
+                </div>
+                <div class="mascot" aria-hidden="true">
+                    <img src="/secret-seal.png" width="192" height="192" alt="" />
+                    <span class="agent-caption">AGENT SEAL / INCOGNITO</span>
+                </div>
+            </div>
+            <section class="create-workspace" aria-labelledby="create-heading">
+                <div class="section-heading">
+                    <h2 id="create-heading">Create a secret</h2>
+                    <span class="section-meta">01 / WRITE & SHARE</span>
+                </div>
+                <label class="sr-only" for="createNote">Your secret message</label>
+                <div class="editor">
+                    <textarea id="createNote" rows="5" placeholder="Your secret is safe to write here…" aria-describedby="encryptionHint" spellcheck="false" autocomplete="off"></textarea>
+                    <div class="editor-toolbar">
+                        <span id="encryptionHint" class="editor-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" /></svg> Encrypted in your browser</span>
+                        <button id="createBtn" type="button">Create secret link <span aria-hidden="true">↗</span></button>
+                    </div>
+                </div>
+                <div id="createResult" class="result" role="status" aria-live="polite"></div>
+                <div id="createShare" class="share-details" style="display:none;">
+                    <div class="share-field">
+                        <span class="field-label">Secret link</span>
+                        <div class="row"><div class="share-value" id="linkBox"></div><button class="copy-btn" id="copyLinkBtn" type="button">Copy link</button></div>
+                    </div>
+                    <details>
+                        <summary>Or share a secret ID</summary>
+                        <div class="row"><div class="share-value" id="guidBox"></div><button class="copy-btn" id="copyIdBtn" type="button">Copy ID</button></div>
+                    </details>
+                    <p class="mini">The decryption key stays in your link. Share it only with your recipient.</p>
+                    <p class="mini" id="retentionNote" style="display:none;"></p>
+                </div>
+                <p class="hint">One link. One read. Automatically deleted when opened.</p>
+            </section>
+            <section class="read-workspace" aria-labelledby="read-heading">
+                <div class="section-heading">
+                    <h2 id="read-heading">Have a secret?</h2>
+                    <span class="section-meta">02 / READ & DESTROY</span>
+                </div>
+                <label for="readId">Paste the secret link or ID, including its key.</label>
+                <div class="read-controls">
+                    <input id="readId" type="text" placeholder="Secret link or ID#k=…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="readHint" />
+                    <button id="readBtn" class="secondary-btn" type="button">Read & destroy <span aria-hidden="true">↗</span></button>
+                </div>
+                <p class="hint" id="readHint">Opening a secret permanently deletes it. Make sure you're ready.</p>
+                <div id="readResult" class="result" role="status" aria-live="polite"></div>
+            </section>
+        </main>
+        <footer class="site-footer">
+            <div class="footer-row"><span class="footer-signature">Small seal. Big discretion.</span><a class="source-link" href="https://github.com/ntulenev/SecretSeal" target="_blank" rel="noopener noreferrer">Source on GitHub <span aria-hidden="true">↗</span></a></div>
+            <div class="footer-row footer-meta"><small>Personal project · For private use</small><span id="projectVersion" class="project-version" aria-label="Project version">Version loading…</span></div>
+        </footer>
+    </div>
+    <script type="module" src="/js/index.js?v=20261030.2"></script>
 </body>
 </html>

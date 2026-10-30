@@ -1,55 +1,39 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Secret Seal - Read secret</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="stylesheet" href="/css/shared.css?v=20260214.1" />
-    <link rel="stylesheet" href="/css/read.css?v=20260214.1" />
+    <meta name="theme-color" content="#090f1a" />
+    <meta name="referrer" content="no-referrer" />
+    <title>SecretSeal — Open a secret</title>
+    <link rel="icon" type="image/png" href="/secret-seal.png" />
+    <link rel="stylesheet" href="/css/shared.css?v=20261030.3" />
+    <link rel="stylesheet" href="/css/read.css?v=20261030.3" />
 </head>
-
 <body>
-
-    <h1 class="logo">
-        <a href="/" title="Go to home">
-            <img class="logo-mark" src="/secret_logo.png" alt="SecretSeal logo" />SecretSeal
-        </a>
-    </h1>
-
-    <section>
-        <div class="question">🔥 Open this secret?</div>
-
-        <div class="actions">
-            <button id="openBtn" type="button">Open & Destroy</button>
-        </div>
-
-        <div id="result" class="result"></div>
-
-        <div class="hint">
-            This secret can be read only once. After opening, it will be permanently deleted.
-        </div>
-    </section>
-
-    <footer>
-        <div class="footer-inner">
-            <div class="footer-text">SecretSeal — read once, vanish forever</div>
-
-            <a class="source-link"
-               href="https://github.com/ntulenev/SecretSeal"
-               target="_blank"
-               rel="noopener noreferrer">
-                ⚙️ Project source on GitHub
-            </a>
-
-            <small>Personal pet project for private use · Not intended for public use</small>
-        </div>
-    </footer>
-
-    <script type="module" src="/js/read.js?v=20260214"></script>
-
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="brand" href="/" aria-label="SecretSeal home"><img src="/secret-seal.png" width="48" height="48" alt="" /><span>SecretSeal<span class="brand-dot">.</span></span></a>
+            <a class="back-link" href="/">Create a secret <span aria-hidden="true">↗</span></a>
+        </header>
+        <main id="main" class="recipient-main" tabindex="-1">
+            <section class="open-workspace" aria-labelledby="open-heading">
+                <div class="recipient-mascot"><img src="/secret-seal.png" width="144" height="144" alt="A pixel art seal in a spy hat, sunglasses and trench coat" /></div>
+                <p class="eyebrow">FOR YOUR EYES ONLY</p>
+                <h1 id="open-heading">A secret awaits.</h1>
+                <p class="intro-copy" id="openDescription">One chance to read it.<br />Once opened, it's deleted for good.</p>
+                <div class="actions"><button id="openBtn" type="button">Open & destroy <span aria-hidden="true">↗</span></button></div>
+                <p class="hint" id="openHint">Your secret will appear here. Only open it when you're ready.</p>
+                <div id="result" class="result" role="status" aria-live="polite"></div>
+                <a class="new-secret-link" href="/">Send a secret of your own <span aria-hidden="true">→</span></a>
+            </section>
+        </main>
+        <footer class="site-footer">
+            <div class="footer-row"><span class="footer-signature">Small seal. Big discretion.</span><a class="source-link" href="https://github.com/ntulenev/SecretSeal" target="_blank" rel="noopener noreferrer">Source on GitHub <span aria-hidden="true">↗</span></a></div>
+            <div class="footer-row footer-meta"><small>Personal project · For private use</small><span id="projectVersion" class="project-version" aria-label="Project version">Version loading…</span></div>
+        </footer>
+    </div>
+    <script type="module" src="/js/read.js?v=20261030.2"></script>
 </body>
 </html>

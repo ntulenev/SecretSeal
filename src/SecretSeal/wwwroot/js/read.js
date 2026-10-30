@@ -1,3 +1,5 @@
+import "./version.js?v=20261030";
+
 import {
     NOT_FOUND,
     mustGet,
@@ -5,13 +7,20 @@ import {
     readJsonSafe,
     b64urlToBytes,
     importAesKeyFromB64url,
-} from "./shared.js";
+} from "./shared.js?v=20261030";
 
 // =============================
 // Constants / DOM
 // =============================
 const openBtn = mustGet("openBtn");
 const resultEl = mustGet("result");
+
+// A normal #main link would replace the decryption key in the URL.
+document.querySelector(".skip-link").addEventListener("click", (event) => {
+    event.preventDefault();
+    mustGet("main").focus();
+    mustGet("main").scrollIntoView();
+});
 
 function setResultEl(kind, text) {
     setResult(resultEl, kind, text);
@@ -33,12 +42,14 @@ function getKeyFromHash() {
     return k || null;
 }
 
+// Keep the original key for this one-shot read.
+const decryptionKey = getKeyFromHash();
+
 // =============================
 // UI helpers
 // =============================
 function disableForever(btn) {
     btn.disabled = true;
-    btn.setAttribute("aria-busy", "true");
     btn.dataset.used = "1";
 }
 
@@ -99,6 +110,8 @@ async function openSecretOnce() {
 
     // Disable immediately and remove handler to make it truly one-shot
     disableForever(openBtn);
+    openBtn.setAttribute("aria-busy", "true");
+    openBtn.textContent = "Opening…";
     openBtn.removeEventListener("click", openSecretOnce);
 
     setResultEl(null, "");
@@ -106,7 +119,7 @@ async function openSecretOnce() {
     try {
         if (!id) throw new Error("No secret ID provided in URL.");
 
-        const key = getKeyFromHash();
+        const key = decryptionKey;
         if (!key) throw new Error(NOT_FOUND);
 
         const data = await apiConsumeNote(id);
@@ -116,9 +129,18 @@ async function openSecretOnce() {
 
         const plaintext = await decryptFromPayloadString(payloadString, key);
         setResultEl("success", `Secret:\n\n${plaintext}`);
+        mustGet("open-heading").textContent = "For your eyes only.";
+        mustGet("openDescription").textContent = "This secret has been deleted from the server.";
+        mustGet("openHint").textContent = "Keep what you need before leaving this page. It can't be opened again.";
+        openBtn.textContent = "Secret opened";
     } catch (err) {
         setResultEl("error", err?.message || NOT_FOUND);
-        // keep disabled forever (old behavior you want)
+        mustGet("open-heading").textContent = "Secret unavailable.";
+        mustGet("openDescription").textContent = "This link may be incomplete, expired or already opened.";
+        mustGet("openHint").textContent = "Ask the sender for a new secret link.";
+        openBtn.textContent = "Unable to open";
+    } finally {
+        openBtn.setAttribute("aria-busy", "false");
     }
 }
 
@@ -127,13 +149,13 @@ async function openSecretOnce() {
 // =============================
 if (!id) {
     disableForever(openBtn);
+    openBtn.textContent = "Link required";
+    mustGet("open-heading").textContent = "A link is missing.";
+    mustGet("openDescription").textContent = "Use the complete secret link shared by the sender.";
+    mustGet("openHint").textContent = "Ask the sender for their secret link.";
     setResultEl("error", "No secret ID provided in URL.");
 } else {
     openBtn.addEventListener("click", openSecretOnce, { passive: true });
 
-    // Optional: Enter triggers open once as well
-    window.addEventListener("keydown", (e) => {
-        if (e.key !== "Enter") return;
-        openSecretOnce();
-    });
+    // Native button keyboard activation keeps Enter scoped to the focused action.
 }

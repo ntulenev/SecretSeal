@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using SecretSeal.UseCases;
 
 using Transport;
@@ -39,6 +41,14 @@ internal static class WebApplicationEndpointExtensions
             });
 
         _ = app.MapGet("/hc", () => Results.Ok(new { status = "healthy" }));
+
+        var version = typeof(WebApplicationEndpointExtensions).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
+        _ = app.MapGet("/version", (HttpContext context) =>
+        {
+            context.Response.Headers.CacheControl = "no-store";
+            return Results.Ok(new { version });
+        });
 
         _ = app.MapGet(
                 "/stat",
