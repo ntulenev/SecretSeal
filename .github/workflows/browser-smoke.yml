@@ -1,0 +1,23 @@
+name: Browser smoke tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Build browser tests
+        run: dotnet build src/SecretSeal.BrowserTests/SecretSeal.BrowserTests.csproj -c Release
+      - name: Install Chromium
+        run: pwsh src/SecretSeal.BrowserTests/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+      - name: Run browser smoke tests
+        run: dotnet test src/SecretSeal.BrowserTests/SecretSeal.BrowserTests.csproj -c Release --no-build --no-restore

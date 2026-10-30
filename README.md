@@ -96,6 +96,10 @@ The same flow adapts to a narrow screen. These screenshots were captured at a 39
 
 </details>
 
+### Testing
+
+See [testing and coverage](docs/testing.md) for the test layers, coverage audit, and commands for running the SQL Server and browser smoke tests.
+
 ### 🔐 Encryption
 
 #### Client-side encryption
