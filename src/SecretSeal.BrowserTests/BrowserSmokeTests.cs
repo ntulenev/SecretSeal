@@ -47,6 +47,9 @@ public sealed class BrowserSmokeTests : IClassFixture<RunningAppFixture>
 
         var recipient = await browser.NewPageAsync();
         _ = await recipient.GotoAsync(link);
+        await recipient.Locator(".skip-link").FocusAsync();
+        await recipient.Keyboard.PressAsync("Enter");
+        Assert.Equal(new Uri(link).Fragment, await recipient.EvaluateAsync<string>("window.location.hash"));
         await recipient.Locator("#openBtn").ClickAsync();
         await Expect(recipient.Locator("#result")).ToContainTextAsync(secret);
         await Expect(recipient.Locator("#openBtn")).ToBeDisabledAsync();
@@ -90,6 +93,33 @@ public sealed class BrowserSmokeTests : IClassFixture<RunningAppFixture>
 
         await Expect(page.Locator("#openBtn")).ToBeDisabledAsync();
         await Expect(page.Locator("#result")).ToContainTextAsync("No secret ID provided in URL.");
+    }
+
+    [Fact(DisplayName = "A link without its decryption key cannot consume the secret")]
+    [Trait("Category", "SmokeE2E")]
+    public async Task MissingKeyDoesNotConsumeSecretAsync()
+    {
+        using var playwright = await Playwright.CreateAsync();
+        await using var browser = await LaunchBrowserAsync(playwright);
+        var sender = await browser.NewPageAsync();
+        const string secret = "keep this until the full link arrives";
+
+        _ = await sender.GotoAsync(_app.BaseUrl);
+        await sender.Locator("#createNote").FillAsync(secret);
+        await sender.Locator("#createBtn").ClickAsync();
+        await Expect(sender.Locator("#createResult")).ToContainTextAsync("Secret sealed");
+
+        var link = (await sender.Locator("#linkBox").TextContentAsync())!.Trim();
+        var incompleteLink = link[..link.IndexOf('#', StringComparison.Ordinal)];
+        var recipient = await browser.NewPageAsync();
+        _ = await recipient.GotoAsync(incompleteLink);
+
+        await Expect(recipient.Locator("#openBtn")).ToBeDisabledAsync();
+        await Expect(recipient.Locator("#result")).ToContainTextAsync("No decryption key provided in URL.");
+
+        _ = await recipient.GotoAsync(link);
+        await recipient.Locator("#openBtn").ClickAsync();
+        await Expect(recipient.Locator("#result")).ToContainTextAsync(secret);
     }
 
     private static async Task<IBrowser> LaunchBrowserAsync(IPlaywright playwright) =>
