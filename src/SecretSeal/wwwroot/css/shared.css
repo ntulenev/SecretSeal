@@ -48,7 +48,27 @@ input { padding: 13px 16px; width: 100%; }
 .result:empty { display: none; }
 .result { margin-top: 18px; padding: 16px 18px; border-radius: 8px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; animation: appear 220ms ease both; }
 .success { background: #102d36; color: #a4e7e9; border: 1px solid #26535f; }
-.error { background: #321d29; color: #ffb8bd; border: 1px solid #643443; }
+.error {
+    position: relative;
+    padding: 14px 18px 14px 48px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-size: 13px;
+}
+.error::before {
+    content: "!";
+    position: absolute;
+    top: 15px;
+    left: 17px;
+    width: 18px;
+    height: 18px;
+    border: 1px solid #b88d84;
+    border-radius: 50%;
+    color: #d6aaa0;
+    font: 600 12px/16px var(--mono);
+    text-align: center;
+}
 .site-footer { margin-top: auto; padding: 28px 0 24px; border-top: 1px solid var(--border); }
 .footer-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
 .footer-signature { font-size: 13px; font-weight: 600; }

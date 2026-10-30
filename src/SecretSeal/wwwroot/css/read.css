@@ -6,6 +6,7 @@
 .actions { display: flex; justify-content: center; margin: 28px 0 16px; }
 .actions button { min-width: 210px; }
 .open-workspace .result { text-align: left; max-width: 680px; margin: 28px auto 0; }
+.open-workspace .result.error { max-width: 520px; }
 .new-secret-link { display: inline-block; font-size: 13px; color: var(--accent); margin-top: 30px; }
 .open-workspace .eyebrow { margin-bottom: 12px; }
 @media (max-width: 600px) {
