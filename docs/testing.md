@@ -8,9 +8,9 @@ The solution has unit tests for models, transport validation, cryptography, note
 | --- | --- | ---: |
 | Unit | Validation, identifiers, encryption, note handlers, cleanup, use cases | 147 |
 | Integration | API responses, one-time consumption, static pages and scripts, SQL Server persistence | 18 |
-| Browser smoke | Shared link, browser-side encryption and decryption, one-time read, home-page read, incomplete link | 3 |
+| Browser smoke | Shared link, browser-side encryption and decryption, one-time read, home-page read, incomplete link and missing key | 4 |
 
-The complete solution run passed **199 test cases**. The previous solution had **193** and no browser smoke tests. The `XPlat Code Coverage` reports were merged by source file and line number, excluding generated `obj` code. They show **587 of 592 instrumented C# lines (99.2%)** covered. By project: Cryptography 85/86, Logic 93/94, Models 25/25, SecretSeal 229/230, Storage 71/71, and Transport 84/86. This is C# line coverage; it does not measure JavaScript statements or prove that all failure modes are tested.
+The complete solution run passed **200 test cases**. The previous solution had **193** and no browser smoke tests. The `XPlat Code Coverage` reports were merged by source file and line number, excluding generated `obj` code. They show **587 of 592 instrumented C# lines (99.2%)** covered. By project: Cryptography 85/86, Logic 93/94, Models 25/25, SecretSeal 229/230, Storage 71/71, and Transport 84/86. This is C# line coverage; it does not measure JavaScript statements or prove that all failure modes are tested.
 
 The important functional gap was the user flow in the browser. Server-side API tests could pass even if the UI failed to encrypt a secret, build a usable link, decrypt it, or prevent a second read. The new browser tests cover that path. The new integration tests verify static pages and scripts are served and that two clients observe the same one-time secret.
 
