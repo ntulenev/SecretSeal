@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 
 using Microsoft.Playwright;
+
 using static Microsoft.Playwright.Assertions;
 
 namespace SecretSeal.BrowserTests;
@@ -11,11 +12,14 @@ public sealed class BrowserSmokeTests : IClassFixture<RunningAppFixture>
 {
     private readonly RunningAppFixture _app;
 
-    public BrowserSmokeTests(RunningAppFixture app) => _app = app;
+    public BrowserSmokeTests(RunningAppFixture app)
+    {
+        _app = app;
+    }
 
     [Fact(DisplayName = "A shared link reveals the secret once, then becomes unavailable")]
     [Trait("Category", "SmokeE2E")]
-    public async Task SharedLinkCanBeOpenedOnlyOnce()
+    public async Task SharedLinkCanBeOpenedOnlyOnceAsync()
     {
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await LaunchBrowserAsync(playwright);
@@ -30,7 +34,7 @@ public sealed class BrowserSmokeTests : IClassFixture<RunningAppFixture>
             }
         };
 
-        await page.GotoAsync(_app.BaseUrl);
+        _ = await page.GotoAsync(_app.BaseUrl);
         await page.Locator("#createNote").FillAsync(secret);
         await page.Locator("#createBtn").ClickAsync();
         await Expect(page.Locator("#createResult")).ToContainTextAsync("Secret sealed");
@@ -42,27 +46,30 @@ public sealed class BrowserSmokeTests : IClassFixture<RunningAppFixture>
         Assert.DoesNotContain(secret, postedBody, StringComparison.Ordinal);
 
         var recipient = await browser.NewPageAsync();
-        await recipient.GotoAsync(link);
+        _ = await recipient.GotoAsync(link);
+        await recipient.Locator(".skip-link").FocusAsync();
+        await recipient.Keyboard.PressAsync("Enter");
+        Assert.Equal(new Uri(link).Fragment, await recipient.EvaluateAsync<string>("window.location.hash"));
         await recipient.Locator("#openBtn").ClickAsync();
         await Expect(recipient.Locator("#result")).ToContainTextAsync(secret);
         await Expect(recipient.Locator("#openBtn")).ToBeDisabledAsync();
 
         var secondVisit = await browser.NewPageAsync();
-        await secondVisit.GotoAsync(link);
+        _ = await secondVisit.GotoAsync(link);
         await secondVisit.Locator("#openBtn").ClickAsync();
         await Expect(secondVisit.Locator("#result")).ToContainTextAsync("Note not found (or already consumed).");
     }
 
     [Fact(DisplayName = "The home page reads a composite secret ID")]
     [Trait("Category", "SmokeE2E")]
-    public async Task HomePageReadsCompositeId()
+    public async Task HomePageReadsCompositeIdAsync()
     {
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await LaunchBrowserAsync(playwright);
         var page = await browser.NewPageAsync();
         const string secret = "home page recipient";
 
-        await page.GotoAsync(_app.BaseUrl);
+        _ = await page.GotoAsync(_app.BaseUrl);
         await page.Locator("#createNote").FillAsync(secret);
         await page.Locator("#createBtn").ClickAsync();
         await Expect(page.Locator("#createResult")).ToContainTextAsync("Secret sealed");
@@ -76,16 +83,43 @@ public sealed class BrowserSmokeTests : IClassFixture<RunningAppFixture>
 
     [Fact(DisplayName = "An incomplete recipient link never offers to consume a secret")]
     [Trait("Category", "SmokeE2E")]
-    public async Task MissingIdDisablesOpenButton()
+    public async Task MissingIdDisablesOpenButtonAsync()
     {
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await LaunchBrowserAsync(playwright);
         var page = await browser.NewPageAsync();
 
-        await page.GotoAsync($"{_app.BaseUrl}read.html");
+        _ = await page.GotoAsync($"{_app.BaseUrl}read.html");
 
         await Expect(page.Locator("#openBtn")).ToBeDisabledAsync();
         await Expect(page.Locator("#result")).ToContainTextAsync("No secret ID provided in URL.");
+    }
+
+    [Fact(DisplayName = "A link without its decryption key cannot consume the secret")]
+    [Trait("Category", "SmokeE2E")]
+    public async Task MissingKeyDoesNotConsumeSecretAsync()
+    {
+        using var playwright = await Playwright.CreateAsync();
+        await using var browser = await LaunchBrowserAsync(playwright);
+        var sender = await browser.NewPageAsync();
+        const string secret = "keep this until the full link arrives";
+
+        _ = await sender.GotoAsync(_app.BaseUrl);
+        await sender.Locator("#createNote").FillAsync(secret);
+        await sender.Locator("#createBtn").ClickAsync();
+        await Expect(sender.Locator("#createResult")).ToContainTextAsync("Secret sealed");
+
+        var link = (await sender.Locator("#linkBox").TextContentAsync())!.Trim();
+        var incompleteLink = link[..link.IndexOf('#', StringComparison.Ordinal)];
+        var recipient = await browser.NewPageAsync();
+        _ = await recipient.GotoAsync(incompleteLink);
+
+        await Expect(recipient.Locator("#openBtn")).ToBeDisabledAsync();
+        await Expect(recipient.Locator("#result")).ToContainTextAsync("No decryption key provided in URL.");
+
+        _ = await recipient.GotoAsync(link);
+        await recipient.Locator("#openBtn").ClickAsync();
+        await Expect(recipient.Locator("#result")).ToContainTextAsync(secret);
     }
 
     private static async Task<IBrowser> LaunchBrowserAsync(IPlaywright playwright) =>

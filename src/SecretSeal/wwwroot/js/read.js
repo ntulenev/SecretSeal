@@ -42,9 +42,6 @@ function getKeyFromHash() {
     return k || null;
 }
 
-// Keep the original key for this one-shot read.
-const decryptionKey = getKeyFromHash();
-
 // =============================
 // UI helpers
 // =============================
@@ -119,7 +116,7 @@ async function openSecretOnce() {
     try {
         if (!id) throw new Error("No secret ID provided in URL.");
 
-        const key = decryptionKey;
+        const key = getKeyFromHash();
         if (!key) throw new Error(NOT_FOUND);
 
         const data = await apiConsumeNote(id);
@@ -145,17 +142,29 @@ async function openSecretOnce() {
 }
 
 // =============================
-// Init
+// Init and fragment changes
 // =============================
-if (!id) {
-    disableForever(openBtn);
-    openBtn.textContent = "Link required";
-    mustGet("open-heading").textContent = "A link is missing.";
-    mustGet("openDescription").textContent = "Use the complete secret link shared by the sender.";
-    mustGet("openHint").textContent = "Ask the sender for their secret link.";
-    setResultEl("error", "No secret ID provided in URL.");
-} else {
-    openBtn.addEventListener("click", openSecretOnce, { passive: true });
+function updateLinkState() {
+    if (openBtn.dataset.used === "1") return;
 
-    // Native button keyboard activation keeps Enter scoped to the focused action.
+    if (!id || !getKeyFromHash()) {
+        openBtn.disabled = true;
+        openBtn.textContent = "Link required";
+        mustGet("open-heading").textContent = id ? "A link is incomplete." : "A link is missing.";
+        mustGet("openDescription").textContent = "Use the complete secret link shared by the sender.";
+        mustGet("openHint").textContent = "Ask the sender for their secret link.";
+        setResultEl("error", id ? "No decryption key provided in URL." : "No secret ID provided in URL.");
+        return;
+    }
+
+    openBtn.disabled = false;
+    openBtn.textContent = "Open & destroy";
+    mustGet("open-heading").textContent = "A secret awaits.";
+    mustGet("openDescription").textContent = "One chance to read it. Once opened, it's deleted for good.";
+    mustGet("openHint").textContent = "Your secret will appear here. Only open it when you're ready.";
+    setResultEl(null, "");
+    openBtn.addEventListener("click", openSecretOnce, { passive: true });
 }
+
+updateLinkState();
+window.addEventListener("hashchange", updateLinkState);

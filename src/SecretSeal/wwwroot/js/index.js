@@ -317,5 +317,5 @@ els.readId.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-     getRetentionPolicy().catch(() => { /* ignore */ });
+    getRetentionPolicy().catch(() => { /* ignore */ });
 });
