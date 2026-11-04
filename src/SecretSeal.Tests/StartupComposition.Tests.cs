@@ -314,32 +314,23 @@ public sealed class StartupCompositionTests
     public async Task EnsureStorageCreatedIfNeededAsyncWhenStorageIsDatabaseCreatesDatabase()
     {
         // Arrange
-        var connectionString =
-            $"Server=(localdb)\\MSSQLLocalDB;Database=SecretSealEnsureCreated_{Guid.NewGuid():N};Trusted_Connection=True;TrustServerCertificate=True;";
-
-        try
+        var builder = WebApplication.CreateBuilder();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            var builder = WebApplication.CreateBuilder();
-            builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Storage:Mode"] = "Database"
-            });
-            builder.Services.AddDbContext<SecretSealDbContext>(options => options.UseSqlServer(connectionString));
+            ["Storage:Mode"] = "Database"
+        });
+        var databaseName = $"SecretSealEnsureCreated_{Guid.NewGuid():N}";
+        builder.Services.AddDbContext<SecretSealDbContext>(options =>
+            options.UseInMemoryDatabase(databaseName));
+        await using var app = builder.Build();
 
-            await using var app = builder.Build();
+        // Act
+        await app.EnsureStorageCreatedIfNeededAsync();
 
-            // Act
-            await app.EnsureStorageCreatedIfNeededAsync();
-
-            // Assert
-            await using var context = CreateSqlServerContext(connectionString);
-            (await context.Database.CanConnectAsync()).Should().BeTrue();
-        }
-        finally
-        {
-            await using var cleanupContext = CreateSqlServerContext(connectionString);
-            await cleanupContext.Database.EnsureDeletedAsync();
-        }
+        // Assert: a second initialization must report that the database already exists.
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<SecretSealDbContext>();
+        (await context.Database.EnsureCreatedAsync()).Should().BeFalse();
     }
 
     private static IConfiguration CreateConfiguration(params (string Key, string? Value)[] overrides)
@@ -363,12 +354,4 @@ public sealed class StartupCompositionTests
             .Build();
     }
 
-    private static SecretSealDbContext CreateSqlServerContext(string connectionString)
-    {
-        var options = new DbContextOptionsBuilder<SecretSealDbContext>()
-            .UseSqlServer(connectionString)
-            .Options;
-
-        return new SecretSealDbContext(options);
-    }
 }
